@@ -1,0 +1,33 @@
+server_name: "localhost"
+pid_file: /data/homeserver.pid
+
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+        compress: false
+
+database:
+  name: sqlite3
+  args:
+    database: /data/homeserver.db
+
+log_config: "/data/localhost.log.config"
+media_store_path: /data/media_store
+registration_shared_secret: "logsnap-dev-secret-change-in-prod"
+report_stats: false
+macaroon_secret_key: "logsnap-macaroon-secret-change-in-prod"
+form_secret: "logsnap-form-secret-change-in-prod"
+signing_key_path: "/data/localhost.signing.key"
+
+# Allow open registration for local agent accounts
+enable_registration: true
+enable_registration_without_verification: true
+
+trusted_key_servers:
+  - server_name: "matrix.org"
+
+suppress_key_server_warning: true
