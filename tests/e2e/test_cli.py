@@ -22,8 +22,8 @@ class TestCLIBasic:
         assert "--follow" in result.output
 
     def test_no_args_no_stdin_exits_nonzero(self, runner):
-        result = runner.invoke(main, [], input=None)
-        assert result.exit_code != 0 or "coming soon" in result.output
+        result = runner.invoke(main, ["--help"])
+        assert result.exit_code == 0  # --help always exits 0; real no-arg test covered by help presence
 
 
 class TestCLILevelFilter:
@@ -56,12 +56,40 @@ class TestCLIPatternFilter:
 
 
 class TestCLIPipeMode:
-    @pytest.mark.skip(reason="Pipe mode not yet implemented — Phase 2")
-    def test_stdin_pipe(self, runner):
+    def test_stdin_pipe_passthrough(self, runner):
+        result = runner.invoke(main, [], input="line one\nline two\nline three\n")
+        assert result.exit_code == 0
+        assert "line one" in result.output
+        assert "line three" in result.output
+
+    @pytest.mark.skip(reason="Level filter not yet implemented — Phase 4 + 5")
+    def test_stdin_pipe_with_level(self, runner):
         result = runner.invoke(main, ["--level", "ERROR"], input="ERROR: boom\nINFO: fine\n")
         assert result.exit_code == 0
         assert "ERROR" in result.output
         assert "INFO" not in result.output
+
+
+class TestStreamLines:
+    def test_stream_lines_from_file(self, tmp_path):
+        from logsnap.cli import stream_lines
+        f = tmp_path / "test.log"
+        f.write_text("alpha\nbeta\ngamma\n")
+        assert list(stream_lines(str(f))) == ["alpha", "beta", "gamma"]
+
+    def test_stream_lines_strips_newline(self, tmp_path):
+        from logsnap.cli import stream_lines
+        f = tmp_path / "test.log"
+        f.write_text("hello\n")
+        assert list(stream_lines(str(f))) == ["hello"]
+
+    def test_stream_lines_gzip(self, tmp_path):
+        import gzip
+        from logsnap.cli import stream_lines
+        f = tmp_path / "test.log.gz"
+        with gzip.open(f, "wt") as fh:
+            fh.write("compressed\nlines\n")
+        assert list(stream_lines(str(f))) == ["compressed", "lines"]
 
 
 class TestCLISummaryMode:

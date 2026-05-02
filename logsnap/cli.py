@@ -1,4 +1,29 @@
+import gzip
+import sys
+from typing import Generator, Optional
+
 import click
+
+
+def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
+    """Yield lines one at a time from a file path or stdin.
+
+    Args:
+        path: File path, '-' for stdin, or None for stdin.
+              Transparently handles .gz files.
+
+    Yields:
+        Each line as a string with the trailing newline stripped.
+    """
+    if path is None or path == "-":
+        for line in sys.stdin:
+            yield line.rstrip("\n")
+        return
+
+    open_fn = gzip.open if path.endswith(".gz") else open
+    with open_fn(path, "rt", encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            yield line.rstrip("\n")
 
 
 @click.command()
@@ -22,4 +47,8 @@ def main(file, level, pattern, from_dt, to_dt, context, follow, summary):
       logsnap --follow --level ERROR app.log
       cat app.log | logsnap --pattern "connection refused"
     """
-    click.echo("LogSnap — implementation coming soon.")
+    if file is None and not click.get_text_stream("stdin").readable():
+        raise click.UsageError("Provide a FILE argument or pipe input via stdin.")
+
+    for line in stream_lines(file):
+        click.echo(line)

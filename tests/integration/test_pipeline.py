@@ -49,13 +49,11 @@ class TestParserFilterIntegration:
 
 
 class TestStreamingIntegration:
-    @pytest.mark.skip(reason="stream_lines not yet implemented — Phase 2")
     def test_stream_lines_yields_all_lines(self, plaintext_log):
         from logsnap.cli import stream_lines
         result = list(stream_lines(str(plaintext_log)))
         assert len(result) == 7
 
-    @pytest.mark.skip(reason="stream_lines not yet implemented — Phase 2")
     def test_stream_large_file_memory(self, large_log):
         import tracemalloc
         from logsnap.cli import stream_lines

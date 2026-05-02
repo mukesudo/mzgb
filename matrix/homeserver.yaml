@@ -1,5 +1,17 @@
 server_name: "localhost"
+
+# All generated/writable files go to /data (Docker volume — writable)
 pid_file: /data/homeserver.pid
+signing_key_path: /data/localhost.signing.key
+media_store_path: /data/media_store
+
+database:
+  name: sqlite3
+  args:
+    database: /data/homeserver.db
+
+# Log to stdout only — no log config file needed
+log_config: /config/log.yaml
 
 listeners:
   - port: 8008
@@ -10,18 +22,10 @@ listeners:
       - names: [client, federation]
         compress: false
 
-database:
-  name: sqlite3
-  args:
-    database: /data/homeserver.db
-
-log_config: "/data/localhost.log.config"
-media_store_path: /data/media_store
 registration_shared_secret: "logsnap-dev-secret-change-in-prod"
-report_stats: false
 macaroon_secret_key: "logsnap-macaroon-secret-change-in-prod"
 form_secret: "logsnap-form-secret-change-in-prod"
-signing_key_path: "/data/localhost.signing.key"
+report_stats: false
 
 # Allow open registration for local agent accounts
 enable_registration: true
@@ -31,3 +35,39 @@ trusted_key_servers:
   - server_name: "matrix.org"
 
 suppress_key_server_warning: true
+
+# Disable rate limiting for local dev agent environment
+rc_message:
+  per_second: 1000
+  burst_count: 10000
+
+rc_registration:
+  per_second: 1000
+  burst_count: 10000
+
+rc_login:
+  address:
+    per_second: 1000
+    burst_count: 10000
+  account:
+    per_second: 1000
+    burst_count: 10000
+  failed_attempts:
+    per_second: 1000
+    burst_count: 10000
+
+rc_joins:
+  local:
+    per_second: 1000
+    burst_count: 10000
+  remote:
+    per_second: 1000
+    burst_count: 10000
+
+rc_invites:
+  per_room:
+    per_second: 1000
+    burst_count: 10000
+  per_sender:
+    per_second: 1000
+    burst_count: 10000

@@ -28,40 +28,55 @@ REGISTRATION_SECRET = "logsnap-dev-secret-change-in-prod"
 
 
 async def register_agent(session: aiohttp.ClientSession, username: str, password: str) -> bool:
-    """Register a user account via the Synapse admin registration endpoint."""
+    """Register a user account, retrying on rate-limit errors."""
     url = f"{MATRIX_HOMESERVER}/_matrix/client/v3/register"
     payload = {
         "username": username,
         "password": password,
         "auth": {"type": "m.login.dummy"},
     }
-    async with session.post(url, json=payload) as resp:
-        body = await resp.json()
-        if resp.status in (200, 400) and body.get("errcode") == "M_USER_IN_USE":
-            logger.info("  [%s] Already registered — skipping", username)
-            return True
-        if resp.status == 200:
-            logger.info("  [%s] Registered ✓", username)
-            return True
-        logger.error("  [%s] Registration failed: %s", username, body)
-        return False
+    for attempt in range(5):
+        async with session.post(url, json=payload) as resp:
+            body = await resp.json()
+            if body.get("errcode") == "M_USER_IN_USE":
+                logger.info("  [%s] Already registered — skipping", username)
+                return True
+            if resp.status == 200:
+                logger.info("  [%s] Registered ✓", username)
+                return True
+            if body.get("errcode") == "M_LIMIT_EXCEEDED":
+                wait = (body.get("retry_after_ms", 3000) / 1000) + 1
+                logger.warning("  [%s] Rate limited — waiting %.1fs (attempt %d)", username, wait, attempt + 1)
+                await asyncio.sleep(wait)
+                continue
+            logger.error("  [%s] Registration failed: %s", username, body)
+            return False
+    logger.error("  [%s] Registration failed after retries", username)
+    return False
 
 
 async def login_agent(session: aiohttp.ClientSession, username: str, password: str) -> str:
-    """Login and return an access token."""
+    """Login and return an access token, retrying on rate-limit errors."""
     url = f"{MATRIX_HOMESERVER}/_matrix/client/v3/login"
     payload = {
         "type": "m.login.password",
         "identifier": {"type": "m.id.user", "user": username},
         "password": password,
     }
-    async with session.post(url, json=payload) as resp:
-        body = await resp.json()
-        token = body.get("access_token")
-        if not token:
-            raise RuntimeError(f"Login failed for {username}: {body}")
-        logger.info("  [%s] Logged in ✓", username)
-        return token
+    for attempt in range(10):
+        async with session.post(url, json=payload) as resp:
+            body = await resp.json()
+            if body.get("errcode") == "M_LIMIT_EXCEEDED":
+                wait = (body.get("retry_after_ms", 5000) / 1000) + 1
+                logger.warning("  [%s] Rate limited on login — waiting %.1fs (attempt %d)", username, wait, attempt + 1)
+                await asyncio.sleep(wait)
+                continue
+            token = body.get("access_token")
+            if not token:
+                raise RuntimeError(f"Login failed for {username}: {body}")
+            logger.info("  [%s] Logged in ✓", username)
+            return token
+    raise RuntimeError(f"Login failed for {username} after retries — rate limit persists")
 
 
 async def create_room(session: aiohttp.ClientSession, token: str, alias: str) -> str:
@@ -73,8 +88,8 @@ async def create_room(session: aiohttp.ClientSession, token: str, alias: str) ->
         "room_alias_name": local_alias,
         "name": f"LogSnap {local_alias.replace('logsnap-', '').title()}",
         "topic": f"LogSnap agent coordination — {local_alias}",
-        "preset": "private_chat",
-        "visibility": "private",
+        "preset": "public_chat",
+        "visibility": "public",
     }
     async with session.post(url, json=payload, headers=headers) as resp:
         body = await resp.json()
@@ -92,14 +107,32 @@ async def create_room(session: aiohttp.ClientSession, token: str, alias: str) ->
         return room_id
 
 
+async def set_room_public(session: aiohttp.ClientSession, token: str, room_id: str) -> None:
+    """Ensure an existing room has join_rules=public so agents can join without invite."""
+    url = f"{MATRIX_HOMESERVER}/_matrix/client/v3/rooms/{room_id}/state/m.room.join_rules"
+    headers = {"Authorization": f"Bearer {token}"}
+    async with session.put(url, json={"join_rule": "public"}, headers=headers) as resp:
+        body = await resp.json()
+        if resp.status != 200:
+            logger.warning("  Could not set join_rules on %s: %s", room_id, body)
+
+
 async def invite_to_room(session: aiohttp.ClientSession, token: str, room_id: str, user_id: str):
     url = f"{MATRIX_HOMESERVER}/_matrix/client/v3/rooms/{room_id}/invite"
     headers = {"Authorization": f"Bearer {token}"}
-    async with session.post(url, json={"user_id": user_id}, headers=headers) as resp:
-        body = await resp.json()
-        if resp.status == 200 or body.get("errcode") == "M_FORBIDDEN":
+    for attempt in range(6):
+        async with session.post(url, json={"user_id": user_id}, headers=headers) as resp:
+            body = await resp.json()
+            if resp.status == 200:
+                return
+            if body.get("errcode") in ("M_FORBIDDEN", "M_ALREADY_IN_ROOM"):
+                return
+            if body.get("errcode") == "M_LIMIT_EXCEEDED":
+                wait = (body.get("retry_after_ms", 2000) / 1000) + 0.5
+                await asyncio.sleep(wait)
+                continue
+            logger.warning("  Invite %s to %s: %s", user_id, room_id, body)
             return
-        logger.warning("  Invite %s to %s: %s", user_id, room_id, body)
 
 
 async def send_welcome(session: aiohttp.ClientSession, token: str, room_id: str, msg: str):
@@ -118,16 +151,20 @@ async def main():
         logger.info("\n[1/4] Registering agent accounts...")
         for name, cfg in AGENTS.items():
             await register_agent(session, cfg["username"], cfg["password"])
+            await asyncio.sleep(1.5)
 
         # 2. Login as first agent (Natnael — infra) to create rooms
         logger.info("\n[2/4] Logging in as Natnael to create rooms...")
         token = await login_agent(session, "natnael", AGENTS["natnael"]["password"])
 
-        # 3. Create all rooms
+        # 3. Create all rooms and ensure they are public
         logger.info("\n[3/4] Creating Matrix rooms...")
         room_ids = {}
         for key, alias in ROOMS.items():
             room_ids[key] = await create_room(session, token, alias)
+            if room_ids[key]:
+                await set_room_public(session, token, room_ids[key])
+                await asyncio.sleep(0.5)
 
         # 4. Invite all agents to all rooms
         logger.info("\n[4/4] Inviting all agents to all rooms...")

@@ -5,9 +5,11 @@ Uses matrix-nio (async Python Matrix client library).
 
 import asyncio
 import logging
+import time
 from datetime import datetime
 from typing import Optional
 
+import aiohttp
 import nio
 
 logger = logging.getLogger(__name__)
@@ -23,6 +25,7 @@ class AgentMatrixClient:
         self.display_name = display_name
         self.client: Optional[nio.AsyncClient] = None
         self._room_ids: dict[str, str] = {}
+        self._access_token: str = ""
 
     async def connect(self) -> None:
         """Login to the homeserver and set display name."""
@@ -30,31 +33,44 @@ class AgentMatrixClient:
         resp = await self.client.login(self.password)
         if isinstance(resp, nio.LoginError):
             raise RuntimeError(f"[{self.username}] Login failed: {resp.message}")
+        self._access_token = self.client.access_token
+        # Initial sync so the client knows its room memberships
+        await self.client.sync(timeout=5000)
         await self.client.set_displayname(self.display_name)
         logger.info("[%s] Connected to %s", self.username, self.homeserver)
 
     async def join_room(self, room_alias: str) -> str:
         """Join a room by alias and cache its room_id. Returns room_id."""
-        resp = await self.client.join(room_alias)
-        if isinstance(resp, nio.JoinError):
+        for attempt in range(6):
+            resp = await self.client.join(room_alias)
+            if not isinstance(resp, nio.JoinError):
+                room_id = resp.room_id
+                self._room_ids[room_alias] = room_id
+                logger.info("[%s] Joined %s (%s)", self.username, room_alias, room_id)
+                return room_id
+            # Rate limited — back off and retry
+            if "limit" in resp.message.lower() or "too many" in resp.message.lower():
+                wait = 5 * (attempt + 1)
+                logger.warning("[%s] Rate limited joining %s, retrying in %ds...", self.username, room_alias, wait)
+                await asyncio.sleep(wait)
+                continue
             raise RuntimeError(f"[{self.username}] Could not join {room_alias}: {resp.message}")
-        room_id = resp.room_id
-        self._room_ids[room_alias] = room_id
-        logger.info("[%s] Joined %s (%s)", self.username, room_alias, room_id)
-        return room_id
+        raise RuntimeError(f"[{self.username}] Failed to join {room_alias} after retries")
 
     async def send(self, room_alias: str, message: str) -> None:
-        """Send a plain-text message to a room."""
+        """Send a plain-text message to a room via direct HTTP (no sync state needed)."""
         room_id = self._room_ids.get(room_alias)
         if not room_id:
             room_id = await self.join_room(room_alias)
-        resp = await self.client.room_send(
-            room_id=room_id,
-            message_type="m.room.message",
-            content={"msgtype": "m.text", "body": message},
-        )
-        if isinstance(resp, nio.RoomSendError):
-            logger.error("[%s] Send failed in %s: %s", self.username, room_alias, resp.message)
+        txn_id = f"logsnap_{int(time.time() * 1000)}"
+        url = f"{self.homeserver}/_matrix/client/v3/rooms/{room_id}/send/m.room.message/{txn_id}"
+        headers = {"Authorization": f"Bearer {self._access_token}"}
+        payload = {"msgtype": "m.text", "body": message}
+        async with aiohttp.ClientSession() as session:
+            async with session.put(url, json=payload, headers=headers) as resp:
+                if resp.status != 200:
+                    body = await resp.json()
+                    logger.error("[%s] Send failed in %s: %s", self.username, room_alias, body)
 
     async def send_status(self, room_alias: str, status: str, detail: str = "") -> None:
         """Send a structured status update."""
