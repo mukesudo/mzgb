@@ -256,18 +256,26 @@ def run_ast_checks(filepath: str, thresholds: dict) -> List[Finding]:
                 ))
 
             # Silent fallbacks: `or 0`, `or None`, `or ""`
-            fn_source = "\n".join(source_lines[start - 1:end])
-            for pattern, example in [(" or 0", "or 0"), (" or None", "or None"), (' or ""', 'or ""'), (" or ''", "or ''")]:
-                if pattern in fn_source:
-                    findings.append(Finding(
-                        rule_id="no-silent-fallback",
-                        severity="error",
-                        file=filepath,
-                        line=start,
-                        message=f"Silent fallback `{example}` in function `{name}`. Use explicit validation.",
-                        context=fn_source[:120],
-                    ))
-                    break
+            # dawit.py is exempt — it contains these strings as detection patterns
+            if Path(filepath).name != "dawit.py":
+                fn_source = "\n".join(source_lines[start - 1:end])
+                _fallback_patterns = [
+                    (" or 0",    "or 0"),
+                    (" or None", "or None"),
+                    (' or ""',   'or ""'),
+                    (" or ''",   "or ''"),
+                ]
+                for _pat, _example in _fallback_patterns:
+                    if _pat in fn_source:
+                        findings.append(Finding(
+                            rule_id="no-silent-fallback",
+                            severity="error",
+                            file=filepath,
+                            line=start,
+                            message=f"Silent fallback `{_example}` in `{name}`. Use explicit validation.",
+                            context=fn_source[:120],
+                        ))
+                        break
 
         # Class checks
         if isinstance(node, ast.ClassDef):
