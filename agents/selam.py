@@ -17,12 +17,13 @@
 # Matrix rooms: #logsnap-integration, #logsnap-blockers, all agent rooms
 """
 
-import asyncio
 import ast
+import asyncio
 import logging
 import subprocess
 import sys
 from pathlib import Path
+from typing import List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -43,7 +44,7 @@ ANTI_PATTERNS = [
 ]
 
 
-def find_task(task_id: str) -> dict | None:
+def find_task(task_id: str) -> Optional[dict]:
     data = _load()
     for t in data["tasks"]:
         if t["id"] == task_id:
@@ -51,7 +52,7 @@ def find_task(task_id: str) -> dict | None:
     return None
 
 
-def check_syntax(files: list[str]) -> list[str]:
+def check_syntax(files: List[str]) -> List[str]:
     issues = []
     for f in files:
         path = ROOT / f
@@ -64,7 +65,7 @@ def check_syntax(files: list[str]) -> list[str]:
     return issues
 
 
-def check_anti_patterns(files: list[str]) -> list[str]:
+def check_anti_patterns(files: List[str]) -> List[str]:
     issues = []
     for f in files:
         path = ROOT / f
@@ -77,7 +78,7 @@ def check_anti_patterns(files: list[str]) -> list[str]:
     return issues
 
 
-def run_relevant_tests(track: str) -> tuple[bool, str]:
+def run_relevant_tests(track: str) -> Tuple[bool, str]:
     test_map = {
         "backend": ["tests/unit/test_parser.py", "tests/unit/test_filters.py"],
         "cli": ["tests/e2e/test_cli.py"],

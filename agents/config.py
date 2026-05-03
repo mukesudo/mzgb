@@ -55,4 +55,10 @@ AGENTS = {
         "display_name": "Natnael (Infra & Testing)",
         "track": "infra",
     },
+    "dawit": {
+        "username": "endalk",
+        "password": "endalk-logsnap-dev",
+        "display_name": "Dawit (Senior Reviewer)",
+        "track": "review",
+    },
 }

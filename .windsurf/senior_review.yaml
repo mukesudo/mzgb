@@ -1,0 +1,122 @@
+# Senior Developer Review Checklist
+# Used by Dawit (agents/dawit.py) on every post-commit review.
+# Each rule has: id, category, severity (error|warning|info), description, and how to detect it.
+
+rules:
+
+  # ── Correctness ──────────────────────────────────────────────────────────────
+  - id: no-silent-fallback
+    category: correctness
+    severity: error
+    description: "No silent fallbacks to zero/None/empty — missing data must raise or be explicit"
+    ast_pattern: "or 0|or None|or ''"
+    message: "Silent fallback detected. Use explicit validation or raise an exception instead."
+
+  - id: explicit-validation
+    category: correctness
+    severity: error
+    description: "All data sources (files, API responses, user input) must be explicitly validated"
+    check: "functions that open/read/request without try/except or guard clause"
+    message: "Data source used without explicit validation."
+
+  - id: no-bare-except
+    category: correctness
+    severity: error
+    description: "Never use bare except: or except Exception: that silently swallows errors"
+    pylint_id: W0703
+    message: "Bare or overly broad except clause swallows errors silently."
+
+  # ── Structure ─────────────────────────────────────────────────────────────────
+  - id: no-catchall-files
+    category: structure
+    severity: error
+    description: "No functions.py, helpers.py, utils.py, misc.py catchall files"
+    file_name_pattern: "^(functions|helpers|utils|misc|common)\\.py$"
+    message: "Catchall module detected. Split into focused, single-purpose modules."
+
+  - id: single-responsibility
+    category: structure
+    severity: warning
+    description: "Each function must have a single clear responsibility"
+    check: "functions longer than 40 lines or with more than 3 levels of nesting"
+    message: "Function may be doing too much. Consider splitting."
+
+  - id: no-god-class
+    category: structure
+    severity: warning
+    description: "Classes must not exceed 200 lines or 10 public methods"
+    message: "Class is too large. Consider splitting into focused classes."
+
+  # ── Naming ────────────────────────────────────────────────────────────────────
+  - id: no-single-letter-vars
+    category: naming
+    severity: warning
+    description: "No single-letter variable names (except loop indices i, j, k)"
+    exceptions: ["i", "j", "k", "x", "y", "f"]
+    pylint_id: C0103
+    message: "Single-letter variable name found. Use a descriptive name."
+
+  - id: no-ambiguous-names
+    category: naming
+    severity: warning
+    description: "No ambiguous names: l, O, I (look like 1 or 0)"
+    message: "Ambiguous variable name. Rename to avoid confusion."
+
+  # ── Documentation ─────────────────────────────────────────────────────────────
+  - id: public-methods-documented
+    category: documentation
+    severity: warning
+    description: "All public functions and methods must have docstrings"
+    check: "def without leading _ that has no docstring"
+    pylint_id: C0116
+    message: "Public function/method missing docstring."
+
+  - id: module-docstring
+    category: documentation
+    severity: info
+    description: "Every module should have a top-level docstring"
+    pylint_id: C0114
+    message: "Module missing docstring."
+
+  # ── Type Safety ───────────────────────────────────────────────────────────────
+  - id: type-hints-required
+    category: types
+    severity: warning
+    description: "All public function signatures must have type hints"
+    check: "def without -> return annotation or untyped args"
+    message: "Function missing type hints on parameters or return value."
+
+  - id: no-any-type
+    category: types
+    severity: info
+    description: "Avoid typing.Any — use specific types where possible"
+    message: "typing.Any used. Try to use a more specific type."
+
+  # ── Complexity ────────────────────────────────────────────────────────────────
+  - id: max-complexity
+    category: complexity
+    severity: warning
+    description: "Cyclomatic complexity must not exceed 10 per function"
+    pylint_id: R0912
+    message: "Function has too many branches. Refactor to reduce complexity."
+
+  - id: max-function-length
+    category: complexity
+    severity: warning
+    description: "Functions must not exceed 40 lines"
+    message: "Function is too long. Consider splitting."
+
+  - id: max-nesting
+    category: complexity
+    severity: warning
+    description: "Maximum 3 levels of indentation per function"
+    message: "Deep nesting detected. Extract inner logic into helper functions."
+
+thresholds:
+  max_errors_to_block_merge: 1       # any error-severity finding blocks merge
+  max_warnings_before_comment: 3     # warn in Matrix if warnings exceed this
+  function_max_lines: 40
+  class_max_lines: 200
+  class_max_public_methods: 10
+  complexity_max: 10
+  nesting_max: 3
