@@ -56,10 +56,10 @@ _load_env()
 # ── Config ────────────────────────────────────────────────────────────────────
 
 GROQ_API_URL   = "https://api.groq.com/openai/v1/chat/completions"
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/{model}:generateContent"
 
 DEFAULT_GROQ_MODEL   = os.environ.get("GROQ_MODEL",   "llama-3.1-70b-versatile")
-DEFAULT_GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+DEFAULT_GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
 
 MAX_RETRIES    = 3
 RETRY_DELAY    = 5       # seconds between retries

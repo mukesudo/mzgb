@@ -1,9 +1,9 @@
 # LogSnap PM Dashboard
-_Updated: 2026-05-03 07:25 UTC_
+_Updated: 2026-05-03 09:27 UTC_
 
 ## Progress
-- **2/31 tasks done** (6%)
-- Status breakdown: {"DONE": 2, "CLAIMED": 2, "OPEN": 27}
+- **20/31 tasks done** (64%)
+- Status breakdown: {"DONE": 20, "CLAIMED": 5, "OPEN": 6}
 
 ## Active Agents
 - Biruk (Backend) — parser, filters, streaming

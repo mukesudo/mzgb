@@ -459,14 +459,14 @@
       "priority": "MEDIUM",
       "phase": 7,
       "title": "Implement ContextBuffer with deque of size n for pre-context",
-      "assignedAgent": null,
+      "assignedAgent": "tigist",
       "track": "features",
       "files": [
         "logsnap/buffer.py"
       ],
-      "status": "OPEN",
-      "claimedBy": null,
-      "claimedAt": null,
+      "status": "CLAIMED",
+      "claimedBy": "tigist",
+      "claimedAt": "2026-05-03T08:20:46.108368+00:00",
       "acceptanceCriteria": [
         "pre_context() returns last N lines",
         "maxlen enforced"
@@ -523,14 +523,14 @@
       "priority": "MEDIUM",
       "phase": 8,
       "title": "Implement follow_file(path, callback) \u2014 poll for new lines, detect rotation",
-      "assignedAgent": null,
+      "assignedAgent": "tigist",
       "track": "features",
       "files": [
         "logsnap/follow.py"
       ],
-      "status": "OPEN",
-      "claimedBy": null,
-      "claimedAt": null,
+      "status": "CLAIMED",
+      "claimedBy": "tigist",
+      "claimedAt": "2026-05-03T08:54:09.621022+00:00",
       "acceptanceCriteria": [
         "New lines yielded within 1s",
         "File rotation detected via inode change"
@@ -566,14 +566,14 @@
       "priority": "MEDIUM",
       "phase": 9,
       "title": "Implement summarize(lines) \u2014 return counts by level + top 5 patterns",
-      "assignedAgent": null,
+      "assignedAgent": "tigist",
       "track": "features",
       "files": [
         "logsnap/summary.py"
       ],
-      "status": "OPEN",
-      "claimedBy": null,
-      "claimedAt": null,
+      "status": "CLAIMED",
+      "claimedBy": "tigist",
+      "claimedAt": "2026-05-03T08:56:23.141644+00:00",
       "acceptanceCriteria": [
         "Returns dict with level counts and top patterns"
       ],
@@ -630,14 +630,14 @@
       "priority": "LOW",
       "phase": 10,
       "title": "Add gzip support to stream_lines()",
-      "assignedAgent": null,
+      "assignedAgent": "natnael",
       "track": "infra",
       "files": [
         "logsnap/cli.py"
       ],
-      "status": "OPEN",
-      "claimedBy": null,
-      "claimedAt": null,
+      "status": "CLAIMED",
+      "claimedBy": "natnael",
+      "claimedAt": "2026-05-03T08:20:36.304403+00:00",
       "acceptanceCriteria": [
         "logsnap file.log.gz works transparently"
       ],
@@ -650,14 +650,14 @@
       "priority": "LOW",
       "phase": 10,
       "title": "Add --max-matches N flag to stop after N results",
-      "assignedAgent": null,
+      "assignedAgent": "test",
       "track": "infra",
       "files": [
         "logsnap/cli.py"
       ],
-      "status": "OPEN",
-      "claimedBy": null,
-      "claimedAt": null,
+      "status": "CLAIMED",
+      "claimedBy": "test",
+      "claimedAt": "2026-05-03T09:18:45.058202+00:00",
       "acceptanceCriteria": [
         "Stops streaming after N matches"
       ],

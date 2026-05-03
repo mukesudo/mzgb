@@ -33,19 +33,20 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents.autonomous_loop import run_autonomous_loop
-from agents.config import AGENTS, MATRIX_HOMESERVER, ROOMS, TASK_FILES
+from agents.config import AGENTS, MATRIX_HOMESERVER, ROOMS
 from agents.matrix_client import AgentMatrixClient
-from agents.task_reader import mark_done, next_task, summary
+from tasks.queue_manager import stats
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
 logger = logging.getLogger("biruk")
 
 ME = AGENTS["biruk"]
-TRACK = TASK_FILES["backend"]
 ROOT = Path(__file__).parent.parent
 
 
-async def run_tests() -> tuple[bool, str]:
+from typing import Tuple
+
+async def run_tests() -> Tuple[bool, str]:
     """Run backend unit tests. Returns (passed, output)."""
     result = subprocess.run(
         [sys.executable, "-m", "pytest", "tests/unit/test_parser.py",
@@ -135,13 +136,13 @@ async def main():
     for room in [ROOMS["backend"], ROOMS["integration"], ROOMS["blockers"], ROOMS["general"]]:
         await matrix.join_room(room)
 
-    s = summary(TRACK)
+    s = stats()
     await matrix.send(
         ROOMS["general"],
-        f"👋 Selam! Biruk here (Backend). Online and ready.\n"
-        f"  Track: backend.md | {s['done']}/{s['total']} tasks done | {s['pending']} pending.\n"
+        f"👋 Biruk here (Backend). Online and ready.\n"
+        f"  Track: backend | {s.get('DONE', 0)} done, {s.get('OPEN', 0)} open.\n"
         f"  I own: logsnap/parser.py, logsnap/filters.py, stream_lines()\n"
-        f"  I'll post READY: <module> to #logsnap-integration when phases complete."
+        f"  Autonomous mode ON - claiming tasks from queue."
     )
 
     await run_autonomous_loop(matrix, track="backend", track_room=ROOMS["backend"], agent_name="biruk")
