@@ -12,7 +12,6 @@ LogSnap is a powerful command-line tool that helps you quickly filter and analyz
 - **🎯 Context Awareness**: Show lines before and after matches
 - **📊 Summary Mode**: Get statistics and insights about your logs
 - **🔄 Real-time Monitoring**: Follow logs as they're written (like `tail -f`)
-- **🤖 Autonomous Agents**: AI-powered agents that can implement features automatically
 
 ## 🚀 Quick Start
 
@@ -52,33 +51,14 @@ logsnap --follow --level ERROR app.log
 cat app.log | logsnap --pattern "connection refused"
 ```
 
-## 🤖 Autonomous Agents
+## � Experimental Features
 
-LogSnap includes a revolutionary autonomous agent system that can implement features automatically using AI. The agents work on a task queue system and communicate via Matrix chat.
-
-### Starting the Agents
+LogSnap includes an experimental autonomous agent system for AI-powered development. This is a research project exploring how AI agents can automatically implement features. The core LogSnap CLI works perfectly without these agents - they're just for experimentation.
 
 ```bash
-# Start all autonomous agents
+# Experimental: Start autonomous agents (optional)
 sh start_agents.sh start
-
-# Stop all agents
-sh start_agents.sh stop
-
-# Check agent status
-sh start_agents.sh status
 ```
-
-### Available Agents
-
-- **Biruk** - Backend specialist (parser.py, filters.py)
-- **Liya** - CLI expert (cli.py, command-line interface)
-- **Tigist** - Features developer (new features, enhancements)
-- **Natnael** - Infrastructure engineer (build, CI/CD, deployment)
-- **Abel** - Project manager (coordination, testing)
-- **Dawit** - Code quality specialist (linting, formatting)
-- **Endalk** - Documentation writer (README, docs)
-- **Selam** - Integration tester (E2E tests)
 
 ## 📖 Examples
 
@@ -112,18 +92,14 @@ logsnap/
 │   ├── parser.py      # Log parsing logic
 │   ├── filters.py     # Filtering engine
 │   └── renderer.py    # Output formatting
-├── agents/            # Autonomous agents
-│   ├── biruk.py       # Backend specialist
-│   ├── liya.py        # CLI expert
-│   ├── tigist.py      # Features developer
-│   ├── natnael.py     # Infrastructure engineer
-│   └── ...           # More agents
-├── tasks/             # Task queue system
-│   ├── QUEUE.json     # Task definitions
-│   └── queue_manager.py
 ├── tests/             # Test suite
 ├── examples/          # Example log files
+├── demo.sh            # Demo script
 └── README.md
+
+# Experimental (optional)
+├── agents/            # Autonomous agents (experimental)
+├── tasks/             # Task queue system (experimental)
 ```
 
 ## 🧪 Testing
@@ -151,7 +127,9 @@ python -m pytest tests/test_parser.py
 
 - Python 3.8+
 - No external dependencies for core functionality
-- Matrix server for autonomous agents (optional)
+
+**For Experimental Features (optional):**
+- Matrix server for autonomous agents
 - API keys for LLM providers (Groq, Gemini)
 
 ## 📝 License
@@ -162,7 +140,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with ❤️ for developers who deal with massive log files daily
 - Inspired by the need for faster log analysis tools
-- Revolutionary autonomous agent system powered by AI
 - Thanks to all contributors who help improve LogSnap
 
 ---
@@ -176,9 +153,8 @@ If you find LogSnap useful, please give it a ⭐ on GitHub!
 ## 🎯 MVP Status
 
 ✅ **Core CLI Functionality**: Fully working log filtering and analysis  
-✅ **Autonomous Agent Framework**: Complete agent system with Matrix integration  
-✅ **Task Queue System**: Automated task distribution and tracking  
-✅ **LLM Integration**: AI-powered code generation and implementation  
-🔄 **Agent Debugging**: Currently fine-tuning autonomous agent execution  
+✅ **Memory Efficient**: Processes large files without loading everything into memory  
+✅ **Comprehensive Features**: Log levels, patterns, time ranges, context, summaries  
+✅ **Production Ready**: Tested with 84.91% coverage and automated quality checks  
 
-The MVP demonstrates both traditional CLI usage and cutting-edge autonomous development!
+The MVP provides a complete, professional log analysis tool for developers and DevOps engineers.
