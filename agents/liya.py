@@ -31,6 +31,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from agents.autonomous_loop import run_autonomous_loop
 from agents.config import AGENTS, MATRIX_HOMESERVER, ROOMS, TASK_FILES
 from agents.matrix_client import AgentMatrixClient
 from agents.task_reader import mark_done, next_task, summary
@@ -145,8 +146,7 @@ async def main():
         f"  Waiting for Biruk's filter-engine before I wire Phase 5 flags."
     )
 
-    await work_cycle(matrix)
-    await matrix.disconnect()
+    await run_autonomous_loop(matrix, track="cli", track_room=ROOMS["cli"], agent_name="liya")
 
 
 if __name__ == "__main__":

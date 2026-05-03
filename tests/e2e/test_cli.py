@@ -27,7 +27,6 @@ class TestCLIBasic:
 
 
 class TestCLILevelFilter:
-    @pytest.mark.skip(reason="Level filter not yet implemented — Phase 4 + 5")
     def test_level_error_only(self, runner, plaintext_log):
         result = runner.invoke(main, ["--level", "ERROR", str(plaintext_log)])
         assert result.exit_code == 0
@@ -35,7 +34,6 @@ class TestCLILevelFilter:
         assert all("ERROR" in l for l in lines)
         assert len(lines) == 2
 
-    @pytest.mark.skip(reason="Level filter not yet implemented — Phase 4 + 5")
     def test_level_case_insensitive(self, runner, plaintext_log):
         result = runner.invoke(main, ["--level", "error", str(plaintext_log)])
         assert result.exit_code == 0
@@ -43,13 +41,11 @@ class TestCLILevelFilter:
 
 
 class TestCLIPatternFilter:
-    @pytest.mark.skip(reason="Pattern filter not yet implemented — Phase 4 + 5")
     def test_pattern_match(self, runner, plaintext_log):
         result = runner.invoke(main, ["--pattern", "Connection", str(plaintext_log)])
         assert result.exit_code == 0
         assert "Connection" in result.output
 
-    @pytest.mark.skip(reason="Pattern filter not yet implemented — Phase 4 + 5")
     def test_invalid_regex_exits_nonzero(self, runner, plaintext_log):
         result = runner.invoke(main, ["--pattern", "[invalid", str(plaintext_log)])
         assert result.exit_code != 0
@@ -62,7 +58,6 @@ class TestCLIPipeMode:
         assert "line one" in result.output
         assert "line three" in result.output
 
-    @pytest.mark.skip(reason="Level filter not yet implemented — Phase 4 + 5")
     def test_stdin_pipe_with_level(self, runner):
         result = runner.invoke(main, ["--level", "ERROR"], input="ERROR: boom\nINFO: fine\n")
         assert result.exit_code == 0

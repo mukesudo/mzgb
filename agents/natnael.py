@@ -32,6 +32,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from agents.autonomous_loop import run_autonomous_loop
 from agents.config import AGENTS, MATRIX_HOMESERVER, ROOMS, TASK_FILES
 from agents.matrix_client import AgentMatrixClient
 from agents.task_reader import mark_done, next_task, summary
@@ -179,8 +180,7 @@ async def main():
         f"  Starting Phase 1 now. I'll run the final E2E gate when all features land."
     )
 
-    await work_cycle(matrix)
-    await matrix.disconnect()
+    await run_autonomous_loop(matrix, track="infra", track_room=ROOMS["infra"], agent_name="natnael")
 
 
 if __name__ == "__main__":

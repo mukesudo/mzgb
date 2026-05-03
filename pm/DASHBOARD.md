@@ -1,11 +1,11 @@
 # LogSnap PM Dashboard
-
-_Will be updated automatically by Endalk after every merge._
+_Updated: 2026-05-03 07:25 UTC_
 
 ## Progress
-- **0/30 tasks done** (0%)
+- **2/31 tasks done** (6%)
+- Status breakdown: {"DONE": 2, "CLAIMED": 2, "OPEN": 27}
 
-## Agents
+## Active Agents
 - Biruk (Backend) — parser, filters, streaming
 - Liya (CLI) — Click wiring, renderer
 - Tigist (Features) — buffer, follow, summary
@@ -13,10 +13,7 @@ _Will be updated automatically by Endalk after every merge._
 - Selam (Reviewer) — code review gate
 - Endalk (Release) — merge sequencer
 
-## Signal Protocol
-```
-REVIEW:task_id|agent    → triggers Selam code review
-MERGE:task_id|title|agent → triggers Endalk merge + commit
-READY: <module>         → unblocks dependent agents
-SHIP-READY ✓            → Natnael: full E2E suite green
-```
+## Rooms
+- #logsnap-general — announcements
+- #logsnap-integration — READY/MERGE signals
+- #logsnap-blockers — failures and escalations

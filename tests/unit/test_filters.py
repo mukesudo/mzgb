@@ -8,32 +8,27 @@ def make_line(level=None, message="test message", timestamp=None):
 
 
 class TestLevelFilter:
-    @pytest.mark.skip(reason="LevelFilter not yet implemented — Phase 4.1")
     def test_single_level_passes(self):
         from logsnap.filters import LevelFilter
         f = LevelFilter(["ERROR"])
         assert f.match(make_line(level="ERROR")) is True
 
-    @pytest.mark.skip(reason="LevelFilter not yet implemented — Phase 4.1")
     def test_single_level_blocks(self):
         from logsnap.filters import LevelFilter
         f = LevelFilter(["ERROR"])
         assert f.match(make_line(level="INFO")) is False
 
-    @pytest.mark.skip(reason="LevelFilter not yet implemented — Phase 4.1")
     def test_multiple_levels(self):
         from logsnap.filters import LevelFilter
         f = LevelFilter(["ERROR", "WARN"])
         assert f.match(make_line(level="WARN")) is True
         assert f.match(make_line(level="DEBUG")) is False
 
-    @pytest.mark.skip(reason="LevelFilter not yet implemented — Phase 4.1")
     def test_empty_levels_passes_all(self):
         from logsnap.filters import LevelFilter
         f = LevelFilter([])
         assert f.match(make_line(level="DEBUG")) is True
 
-    @pytest.mark.skip(reason="LevelFilter not yet implemented — Phase 4.1")
     def test_case_insensitive(self):
         from logsnap.filters import LevelFilter
         f = LevelFilter(["error"])
@@ -41,25 +36,21 @@ class TestLevelFilter:
 
 
 class TestPatternFilter:
-    @pytest.mark.skip(reason="PatternFilter not yet implemented — Phase 4.2")
     def test_keyword_match(self):
         from logsnap.filters import PatternFilter
         f = PatternFilter("timeout")
         assert f.match(make_line(message="connection timeout occurred")) is True
 
-    @pytest.mark.skip(reason="PatternFilter not yet implemented — Phase 4.2")
     def test_keyword_no_match(self):
         from logsnap.filters import PatternFilter
         f = PatternFilter("timeout")
         assert f.match(make_line(message="everything is fine")) is False
 
-    @pytest.mark.skip(reason="PatternFilter not yet implemented — Phase 4.2")
     def test_regex_match(self):
         from logsnap.filters import PatternFilter
         f = PatternFilter(r"user_id=\d+")
         assert f.match(make_line(message="login user_id=42 success")) is True
 
-    @pytest.mark.skip(reason="PatternFilter not yet implemented — Phase 4.2")
     def test_invalid_regex_raises(self):
         from logsnap.filters import PatternFilter
         import re
@@ -68,7 +59,6 @@ class TestPatternFilter:
 
 
 class TestTimeRangeFilter:
-    @pytest.mark.skip(reason="TimeRangeFilter not yet implemented — Phase 4.3")
     def test_within_range_passes(self):
         from logsnap.filters import TimeRangeFilter
         from datetime import datetime
@@ -79,7 +69,6 @@ class TestTimeRangeFilter:
         line = make_line(timestamp=datetime(2024, 1, 15, 14, 30, 0))
         assert f.match(line) is True
 
-    @pytest.mark.skip(reason="TimeRangeFilter not yet implemented — Phase 4.3")
     def test_outside_range_blocked(self):
         from logsnap.filters import TimeRangeFilter
         from datetime import datetime
@@ -90,7 +79,6 @@ class TestTimeRangeFilter:
         line = make_line(timestamp=datetime(2024, 1, 15, 16, 0, 0))
         assert f.match(line) is False
 
-    @pytest.mark.skip(reason="TimeRangeFilter not yet implemented — Phase 4.3")
     def test_no_timestamp_excluded(self):
         from logsnap.filters import TimeRangeFilter
         from datetime import datetime
@@ -99,14 +87,12 @@ class TestTimeRangeFilter:
 
 
 class TestFilterPipeline:
-    @pytest.mark.skip(reason="FilterPipeline not yet implemented — Phase 4.4")
     def test_and_logic_all_pass(self):
         from logsnap.filters import LevelFilter, PatternFilter, FilterPipeline
         pipeline = FilterPipeline([LevelFilter(["ERROR"]), PatternFilter("timeout")])
         line = make_line(level="ERROR", message="connection timeout")
         assert pipeline.match(line) is True
 
-    @pytest.mark.skip(reason="FilterPipeline not yet implemented — Phase 4.4")
     def test_and_logic_one_fails(self):
         from logsnap.filters import LevelFilter, PatternFilter, FilterPipeline
         pipeline = FilterPipeline([LevelFilter(["ERROR"]), PatternFilter("timeout")])

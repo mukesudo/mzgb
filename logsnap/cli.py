@@ -1,8 +1,13 @@
 import gzip
 import sys
-from typing import Generator, Optional
+from datetime import datetime
+from typing import Generator, List, Optional
 
 import click
+
+from logsnap.filters import FilterPipeline, LevelFilter, PatternFilter, TimeRangeFilter
+from logsnap.parser import detect_format, parse_line
+from logsnap.renderer import Renderer
 
 
 def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
@@ -50,5 +55,50 @@ def main(file, level, pattern, from_dt, to_dt, context, follow, summary):
     if file is None and not click.get_text_stream("stdin").readable():
         raise click.UsageError("Provide a FILE argument or pipe input via stdin.")
 
-    for line in stream_lines(file):
-        click.echo(line)
+    # Parse time range options
+    from_dt_parsed: Optional[datetime] = None
+    to_dt_parsed: Optional[datetime] = None
+    if from_dt:
+        from logsnap.parser import normalize_timestamp
+        from_dt_parsed = normalize_timestamp(from_dt)
+        if from_dt_parsed is None:
+            raise click.BadParameter(f"Cannot parse date: {from_dt!r}", param_hint="'--from'")
+    if to_dt:
+        from logsnap.parser import normalize_timestamp
+        to_dt_parsed = normalize_timestamp(to_dt)
+        if to_dt_parsed is None:
+            raise click.BadParameter(f"Cannot parse date: {to_dt!r}", param_hint="'--to'")
+
+    # Build filter pipeline
+    filters: list = []
+    if level:
+        filters.append(LevelFilter(list(level)))
+    if pattern:
+        filters.append(PatternFilter(pattern))
+    if from_dt_parsed or to_dt_parsed:
+        filters.append(TimeRangeFilter(from_dt_parsed, to_dt_parsed))
+    pipeline = FilterPipeline(filters)
+    renderer = Renderer(pattern=pattern)
+
+    # Stream and detect format
+    lines_buf: List[str] = []
+    raw_stream = stream_lines(file)
+
+    # Peek first 20 lines to detect format
+    for raw in raw_stream:
+        lines_buf.append(raw)
+        if len(lines_buf) >= 20:
+            break
+
+    fmt = detect_format(lines_buf)
+
+    def process_all():
+        for raw in lines_buf:
+            yield raw
+        for raw in raw_stream:
+            yield raw
+
+    for raw in process_all():
+        parsed = parse_line(raw, fmt)
+        if pipeline.match(parsed):
+            renderer.print_match(parsed)

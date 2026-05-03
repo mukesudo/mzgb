@@ -3,7 +3,6 @@ import pytest
 
 
 class TestParserFilterIntegration:
-    @pytest.mark.skip(reason="Parser + FilterPipeline not yet implemented — Phase 5")
     def test_level_filter_on_plaintext_file(self, plaintext_log):
         from logsnap.parser import detect_format, parse_plaintext_line
         from logsnap.filters import LevelFilter, FilterPipeline
@@ -19,7 +18,6 @@ class TestParserFilterIntegration:
         assert all(l.level == "ERROR" for l in matched)
         assert len(matched) == 2
 
-    @pytest.mark.skip(reason="Parser + FilterPipeline not yet implemented — Phase 5")
     def test_pattern_filter_on_json_file(self, json_log):
         from logsnap.parser import detect_format, parse_json_line
         from logsnap.filters import PatternFilter, FilterPipeline
@@ -35,7 +33,6 @@ class TestParserFilterIntegration:
         assert len(matched) == 1
         assert "Connection" in matched[0].message
 
-    @pytest.mark.skip(reason="Parser + FilterPipeline not yet implemented — Phase 5")
     def test_combined_level_and_pattern_filter(self, plaintext_log):
         from logsnap.parser import parse_plaintext_line
         from logsnap.filters import LevelFilter, PatternFilter, FilterPipeline
