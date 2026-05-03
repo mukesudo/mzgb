@@ -13,7 +13,7 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 LOGS="$ROOT/logs"
 mkdir -p "$LOGS"
 
-AGENTS=(natnael biruk liya tigist endalk selam)
+AGENTS=(natnael biruk liya tigist endalk selam abel)
 
 start_all() {
     echo "Starting LogSnap agents..."

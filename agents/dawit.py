@@ -172,10 +172,14 @@ def run_ast_checks(filepath: str, thresholds: dict) -> List[Finding]:
         return findings
 
     source_lines = source.splitlines()
-    max_fn_lines = thresholds.get("function_max_lines", 40)
-    max_nesting = thresholds.get("nesting_max", 3)
-    max_cls_lines = thresholds.get("class_max_lines", 200)
-    max_cls_methods = thresholds.get("class_max_public_methods", 10)
+    default_fn_lines   = 40
+    default_nesting    = 3
+    default_cls_lines  = 200
+    default_cls_methods = 10
+    max_fn_lines   = thresholds.get("function_max_lines",      default_fn_lines)
+    max_nesting    = thresholds.get("nesting_max",             default_nesting)
+    max_cls_lines  = thresholds.get("class_max_lines",        default_cls_lines)
+    max_cls_methods = thresholds.get("class_max_public_methods", default_cls_methods)
 
     # Module docstring
     if not (isinstance(tree.body[0], ast.Expr) and
