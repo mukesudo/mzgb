@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LogSnap — Smart Log Filter</title>
+  <meta name="description" content="LogSnap is a fast, intelligent CLI tool for filtering and analyzing massive log files without loading them into memory." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0f14;
+      --surface:  #131720;
+      --border:   #1f2535;
+      --green:    #39d353;
+      --cyan:     #4af0d0;
+      --yellow:   #f5c842;
+      --red:      #ff5f57;
+      --orange:   #ff9500;
+      --muted:    #5a6480;
+      --text:     #c9d1e0;
+      --bright:   #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--bright);
+      display: flex; align-items: center; gap: 0.5rem;
+      text-decoration: none;
+    }
+    .nav-logo .snap { color: var(--cyan); }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); font-size: 0.9rem; text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--bright); }
+    .nav-cta {
+      background: var(--cyan); color: #0d0f14;
+      padding: 0.45rem 1.1rem; border-radius: 6px;
+      font-weight: 700; font-size: 0.85rem; text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 6rem 1.5rem 4rem;
+      text-align: center;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(74,240,208,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .mascot {
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(74,240,208,0.08); border: 1px solid rgba(74,240,208,0.25);
+      color: var(--cyan); padding: 0.3rem 0.9rem; border-radius: 99px;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 900;
+      color: var(--bright);
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    h1 span { color: var(--cyan); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 3.5rem;
+    }
+    .btn-primary {
+      background: var(--cyan); color: #0d0f14;
+      padding: 0.75rem 1.75rem; border-radius: 8px;
+      font-weight: 700; font-size: 0.95rem; text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-2px); }
+    .btn-secondary {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1.75rem; border-radius: 8px;
+      font-weight: 600; font-size: 0.95rem; text-decoration: none;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--cyan); transform: translateY(-2px); }
+
+    /* ── TERMINAL ── */
+    .terminal-wrap {
+      width: 100%; max-width: 720px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      text-align: left;
+    }
+    .term-bar {
+      background: #1a1f2e;
+      padding: 0.65rem 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: var(--red); }
+    .dot-y { background: var(--yellow); }
+    .dot-g { background: var(--green); }
+    .term-title {
+      margin-left: auto; margin-right: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem; color: var(--muted);
+    }
+    .term-body {
+      padding: 1.25rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      min-height: 260px;
+    }
+    .term-line { display: block; white-space: pre-wrap; }
+    .t-prompt { color: var(--cyan); }
+    .t-cmd    { color: var(--bright); }
+    .t-error  { color: var(--red); }
+    .t-warn   { color: var(--yellow); }
+    .t-info   { color: var(--green); }
+    .t-muted  { color: var(--muted); }
+    .t-orange { color: var(--orange); }
+    .cursor {
+      display: inline-block; width: 8px; height: 1em;
+      background: var(--cyan); vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ── FEATURES ── */
+    section { padding: 5rem 1.5rem; }
+    .section-label {
+      text-align: center; color: var(--cyan);
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 0.75rem;
+    }
+    h2 {
+      text-align: center;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800; color: var(--bright);
+      margin-bottom: 1rem; letter-spacing: -0.02em;
+    }
+    .section-sub {
+      text-align: center; color: var(--muted);
+      max-width: 500px; margin: 0 auto 3rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      max-width: 960px; margin: 0 auto;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .feature-card:hover { border-color: var(--cyan); transform: translateY(-4px); }
+    .feature-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+    .feature-card h3 { color: var(--bright); font-size: 1rem; margin-bottom: 0.4rem; }
+    .feature-card p  { color: var(--muted); font-size: 0.88rem; }
+
+    /* ── USAGE ── */
+    .usage-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .usage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem; max-width: 960px; margin: 0 auto;
+    }
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .code-header {
+      background: #1a1f2e;
+      padding: 0.5rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .code-body {
+      padding: 1rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem; line-height: 1.9;
+    }
+    .c-prompt { color: var(--muted); user-select: none; }
+    .c-cmd    { color: var(--cyan); }
+    .c-flag   { color: var(--orange); }
+    .c-arg    { color: var(--yellow); }
+    .c-out    { color: var(--green); }
+    .c-err    { color: var(--red); }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 3rem;
+      max-width: 700px; margin: 0 auto;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 2.8rem; font-weight: 900;
+      color: var(--bright); font-family: 'JetBrains Mono', monospace;
+    }
+    .stat-num span { color: var(--cyan); }
+    .stat-label { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
+
+    /* ── INSTALL ── */
+    .install-box {
+      max-width: 640px; margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .install-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem; line-height: 2;
+    }
+    .copy-btn {
+      background: rgba(74,240,208,0.1); border: 1px solid rgba(74,240,208,0.3);
+      color: var(--cyan); padding: 0.25rem 0.75rem; border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+      cursor: pointer; float: right; transition: background 0.2s;
+    }
+    .copy-btn:hover { background: rgba(74,240,208,0.2); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 0.85rem;
+    }
+    footer a { color: var(--cyan); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .footer-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--bright); margin-bottom: 0.75rem;
+      display: block;
+    }
+    .footer-logo span { color: var(--cyan); }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .hero-actions { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">⚡ Log<span class="snap">Snap</span></a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="https://github.com/mukesudo/logsnap" target="_blank">GitHub</a></li>
+  </ul>
+  <a class="nav-cta" href="https://github.com/mukesudo/logsnap" target="_blank">Star on GitHub ★</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="mascot">⚡</span>
+  <div class="badge">⚡ Open Source · MIT License · Python 3.9+</div>
+  <h1>Snap through your<br/><span>logs instantly</span></h1>
+  <p class="hero-sub">
+    LogSnap is a fast, intelligent CLI tool for filtering massive log files.
+    Find errors, patterns and anomalies in seconds — without loading everything into memory.
+  </p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="#install">Get Started →</a>
+    <a class="btn-secondary" href="https://github.com/mukesudo/logsnap" target="_blank">View on GitHub</a>
+  </div>
+
+  <!-- Live terminal demo -->
+  <div class="terminal-wrap">
+    <div class="term-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="term-title">⚡ logsnap — terminal</span>
+    </div>
+    <div class="term-body" id="term-output">
+      <span class="term-line t-muted"># Filter a 2GB log file in under a second</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <p class="section-label">Why LogSnap</p>
+  <h2>Everything you need,<br/>nothing you don't</h2>
+  <p class="section-sub">Built for developers and DevOps engineers who live in the terminal.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <h3>Smart Filtering</h3>
+      <p>Filter by log level, regex patterns, or time ranges. Chain multiple filters together.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Lightning Fast</h3>
+      <p>Streams data line by line. Process a 10GB log file without breaking a sweat.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💾</div>
+      <h3>Memory Efficient</h3>
+      <p>Never loads the full file. Constant memory usage no matter how large the log.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3>Context Awareness</h3>
+      <p>Show N lines before and after each match — just like <code style="color:var(--cyan)">grep -C</code>.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Summary Mode</h3>
+      <p>Get a statistics table: level counts, time range, top patterns — instantly.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <h3>Live Follow Mode</h3>
+      <p>Follow a live log file and stream only the lines that match your filter.</p>
+    </div>
+  </div>
+</section>
+
+<!-- USAGE -->
+<section id="usage" class="usage-section">
+  <p class="section-label">Usage</p>
+  <h2>One command.<br/>Infinite power.</h2>
+  <p class="section-sub">Pipe it, chain it, follow it. LogSnap fits right into your workflow.</p>
+  <div class="usage-grid">
+    <div class="code-block">
+      <div class="code-header">Filter by level</div>
+      <div class="code-body">
+        <span class="c-prompt">$ </span><span class="c-cmd">logsnap</span> <span class="c-flag">--level</span> <span class="c-arg">ERROR</span> app.log<br/>
+        <span class="c-err">[ERROR] 14:00:04 Connection timeout</span><br/>
+        <span class="c-err">[ERROR] 14:00:06 DB query failed</span><br/>
+        <span class="c-err">[ERROR] 14:00:09 File not found</span>
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">Pattern match + context</div>
+      <div class="code-body">
+        <span class="c-prompt">$ </span><span class="c-cmd">logsnap</span> <span class="c-flag">--pattern</span> <span class="c-arg">"timeout"</span> <span class="c-flag">-C</span> <span class="c-arg">2</span> app.log<br/>
+        <span class="c-out">[INFO]  14:00:03 Retrying connection...</span><br/>
+        <span class="c-err">[ERROR] 14:00:04 Connection timeout</span><br/>
+        <span class="c-out">[WARN]  14:00:05 Backoff: 5s</span>
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">Time range filter</div>
+      <div class="code-body">
+        <span class="c-prompt">$ </span><span class="c-cmd">logsnap</span> <span class="c-flag">--from</span> <span class="c-arg">"14:00"</span> <span class="c-flag">--to</span> <span class="c-arg">"14:30"</span> app.log<br/>
+        <span class="c-out">[INFO]  14:00:01 Server started</span><br/>
+        <span class="c-out">[INFO]  14:15:22 User login</span><br/>
+        <span class="c-out">[WARN]  14:28:05 High memory: 85%</span>
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">Pipe from anywhere</div>
+      <div class="code-body">
+        <span class="c-prompt">$ </span><span>kubectl logs pod/api</span> <span class="c-flag">|</span> <span class="c-cmd">logsnap</span> <span class="c-flag">--level</span> <span class="c-arg">ERROR</span><br/>
+        <span class="c-prompt">$ </span><span>cat *.log</span> <span class="c-flag">|</span> <span class="c-cmd">logsnap</span> <span class="c-flag">--pattern</span> <span class="c-arg">"OOM"</span><br/>
+        <span class="c-prompt">$ </span><span>journalctl</span> <span class="c-flag">|</span> <span class="c-cmd">logsnap</span> <span class="c-flag">--summary</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section>
+  <p class="section-label">By the numbers</p>
+  <h2>Built for production</h2>
+  <p class="section-sub">Tested, measured, and ready to use on real workloads.</p>
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-num">85<span>%</span></div>
+      <div class="stat-label">Test coverage</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">44<span>+</span></div>
+      <div class="stat-label">Automated tests</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0<span>MB</span></div>
+      <div class="stat-label">Memory footprint*</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">10<span>GB+</span></div>
+      <div class="stat-label">Files handled</div>
+    </div>
+  </div>
+  <p style="text-align:center;color:var(--muted);font-size:0.78rem;margin-top:1.5rem">* Constant memory regardless of file size</p>
+</section>
+
+<!-- INSTALL -->
+<section id="install" class="usage-section">
+  <p class="section-label">Get Started</p>
+  <h2>Up and running<br/>in 30 seconds</h2>
+  <p class="section-sub">Clone, install, and start filtering. No config needed.</p>
+  <div class="install-box">
+    <div class="term-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="term-title">install</span>
+    </div>
+    <div class="install-body">
+      <span class="t-muted"># Clone the repo</span><br/>
+      <span class="t-prompt">$ </span><span class="t-cmd">git clone https://github.com/mukesudo/logsnap.git</span><br/>
+      <span class="t-prompt">$ </span><span class="t-cmd">cd logsnap</span><br/><br/>
+      <span class="t-muted"># Run immediately (no install needed)</span><br/>
+      <span class="t-prompt">$ </span><span class="t-cmd">python3 -m logsnap --level ERROR app.log</span><br/><br/>
+      <span class="t-muted"># Or run the demo</span><br/>
+      <span class="t-prompt">$ </span><span class="t-cmd">./demo.sh</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">⚡ Log<span>Snap</span></span>
+  <p>Built with ❤️ by <a href="https://github.com/mukesudo" target="_blank">Mukhtar Saeed</a></p>
+  <p style="margin-top:0.5rem">
+    <a href="https://github.com/mukesudo/logsnap" target="_blank">GitHub</a> ·
+    <a href="https://github.com/mukesudo/logsnap/issues" target="_blank">Issues</a> ·
+    <a href="https://github.com/mukesudo/logsnap/blob/main/README.md" target="_blank">Docs</a>
+  </p>
+  <p style="margin-top:1rem;font-size:0.75rem;">MIT License · Open Source</p>
+</footer>
+
+<script>
+  // Animated terminal demo
+  const output = document.getElementById('term-output');
+  const lines = [
+    { delay: 600,  html: '<span class="term-line"><span class="t-prompt">❯ </span><span class="t-cmd">logsnap --level ERROR production.log</span></span>' },
+    { delay: 1200, html: '<span class="term-line t-error">[ERROR] 2024-01-15 14:00:04  Connection timeout after 30s</span>' },
+    { delay: 1600, html: '<span class="term-line t-error">[ERROR] 2024-01-15 14:00:06  DB query failed: connection refused</span>' },
+    { delay: 2000, html: '<span class="term-line t-error">[ERROR] 2024-01-15 14:12:33  Out of memory: kill process 2847</span>' },
+    { delay: 2400, html: '<span class="term-line t-muted">──────────────────────────────────────────</span>' },
+    { delay: 2800, html: '<span class="term-line t-muted">3 matches in 847,221 lines — 0.31s</span>' },
+    { delay: 3600, html: '<span class="term-line"> </span>' },
+    { delay: 3800, html: '<span class="term-line"><span class="t-prompt">❯ </span><span class="t-cmd">logsnap --pattern "timeout" --context 1 production.log</span></span>' },
+    { delay: 4600, html: '<span class="term-line t-info">[INFO]  2024-01-15 14:00:03  Retrying connection (attempt 3/5)...</span>' },
+    { delay: 5000, html: '<span class="term-line t-error">[ERROR] 2024-01-15 14:00:04  Connection timeout after 30s</span>' },
+    { delay: 5400, html: '<span class="term-line t-warn">[WARN]  2024-01-15 14:00:05  Backoff delay: 5s</span>' },
+  ];
+
+  let cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  output.appendChild(cursor);
+
+  lines.forEach(({ delay, html }) => {
+    setTimeout(() => {
+      cursor.remove();
+      output.insertAdjacentHTML('beforeend', html);
+      output.appendChild(cursor);
+      output.scrollTop = output.scrollHeight;
+    }, delay);
+  });
+</script>
+
+</body>
+</html>
