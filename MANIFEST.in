@@ -1,0 +1,10 @@
+include README.md
+include LICENSE
+recursive-include logsnap *.py
+prune agents
+prune tasks
+prune tests
+prune docs
+prune logs
+prune pm
+prune openspec

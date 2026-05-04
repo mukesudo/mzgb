@@ -2,6 +2,9 @@
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+include = ["logsnap*"]
+
 [project]
 name = "logsnap"
 version = "0.1.0"
@@ -21,6 +24,11 @@ dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
 ]
+
+[project.urls]
+Homepage = "https://github.com/mukesudo/logsnap"
+Repository = "https://github.com/mukesudo/logsnap"
+Issues = "https://github.com/mukesudo/logsnap/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
