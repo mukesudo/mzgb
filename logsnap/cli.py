@@ -1,7 +1,8 @@
+"""CLI entry point for logsnap — log filtering by level, pattern, and time range."""
 import gzip
 import sys
 from datetime import datetime
-from typing import Generator, List, Optional
+from typing import Any, Generator, Iterator, List, Optional, Tuple
 
 import click
 from rich.console import Console
@@ -65,12 +66,59 @@ def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
             yield line.rstrip("\n")
 
 
-def _help_callback(ctx, _param, value):
+def _help_callback(ctx: click.Context, _param: Any, value: bool) -> None:
+    """Eager callback that prints the banner then the help text."""
     if not value or ctx.resilient_parsing:
         return
     _print_banner()
     click.echo(ctx.get_help())
     ctx.exit()
+
+
+def _parse_time_range(
+    from_dt: Optional[str],
+    to_dt: Optional[str],
+) -> Tuple[Optional[datetime], Optional[datetime]]:
+    """Parse --from / --to strings into datetime objects."""
+    from logsnap.parser import normalize_timestamp
+    from_dt_parsed: Optional[datetime] = None
+    to_dt_parsed: Optional[datetime] = None
+    if from_dt:
+        from_dt_parsed = normalize_timestamp(from_dt)
+        if from_dt_parsed is None:
+            raise click.BadParameter(f"Cannot parse date: {from_dt!r}", param_hint="'--from'")
+    if to_dt:
+        to_dt_parsed = normalize_timestamp(to_dt)
+        if to_dt_parsed is None:
+            raise click.BadParameter(f"Cannot parse date: {to_dt!r}", param_hint="'--to'")
+    return from_dt_parsed, to_dt_parsed
+
+
+def _build_pipeline(
+    level: tuple,
+    pattern: Optional[str],
+    from_dt_parsed: Optional[datetime],
+    to_dt_parsed: Optional[datetime],
+) -> FilterPipeline:
+    """Build a FilterPipeline from CLI option values."""
+    filters: list = []
+    if level:
+        filters.append(LevelFilter(list(level)))
+    if pattern:
+        filters.append(PatternFilter(pattern))
+    if from_dt_parsed or to_dt_parsed:
+        filters.append(TimeRangeFilter(from_dt_parsed, to_dt_parsed))
+    return FilterPipeline(filters)
+
+
+def _peek_and_detect(raw_stream: Iterator[str]) -> Tuple[List[str], str]:
+    """Peek first 20 lines and detect log format."""
+    lines_buf: List[str] = []
+    for raw in raw_stream:
+        lines_buf.append(raw)
+        if len(lines_buf) >= 20:
+            break
+    return lines_buf, detect_format(lines_buf)
 
 
 @click.command(
@@ -105,29 +153,8 @@ def main(ctx, file, level, pattern, from_dt, to_dt, context, follow, summary):
     if file is None and not click.get_text_stream("stdin").readable():
         raise click.UsageError("Provide a FILE argument or pipe input via stdin.")
 
-    # Parse time range options
-    from_dt_parsed: Optional[datetime] = None
-    to_dt_parsed: Optional[datetime] = None
-    if from_dt:
-        from logsnap.parser import normalize_timestamp
-        from_dt_parsed = normalize_timestamp(from_dt)
-        if from_dt_parsed is None:
-            raise click.BadParameter(f"Cannot parse date: {from_dt!r}", param_hint="'--from'")
-    if to_dt:
-        from logsnap.parser import normalize_timestamp
-        to_dt_parsed = normalize_timestamp(to_dt)
-        if to_dt_parsed is None:
-            raise click.BadParameter(f"Cannot parse date: {to_dt!r}", param_hint="'--to'")
-
-    # Build filter pipeline
-    filters: list = []
-    if level:
-        filters.append(LevelFilter(list(level)))
-    if pattern:
-        filters.append(PatternFilter(pattern))
-    if from_dt_parsed or to_dt_parsed:
-        filters.append(TimeRangeFilter(from_dt_parsed, to_dt_parsed))
-    pipeline = FilterPipeline(filters)
+    from_dt_parsed, to_dt_parsed = _parse_time_range(from_dt, to_dt)
+    pipeline = _build_pipeline(level, pattern, from_dt_parsed, to_dt_parsed)
     renderer = Renderer(pattern=pattern)
 
     # Follow mode — stream new lines as they arrive (file only)
@@ -143,22 +170,13 @@ def main(ctx, file, level, pattern, from_dt, to_dt, context, follow, summary):
         return
 
     # Normal mode — read file or stdin
-    lines_buf: List[str] = []
     raw_stream = stream_lines(file)
+    lines_buf, fmt = _peek_and_detect(raw_stream)
 
-    # Peek first 20 lines to detect format
-    for raw in raw_stream:
-        lines_buf.append(raw)
-        if len(lines_buf) >= 20:
-            break
-
-    fmt = detect_format(lines_buf)
-
-    def process_all():
-        for raw in lines_buf:
-            yield raw
-        for raw in raw_stream:
-            yield raw
+    def process_all() -> Generator[str, None, None]:
+        """Yield buffered lines then remaining stream."""
+        yield from lines_buf
+        yield from raw_stream
 
     # Summary mode
     if summary:
