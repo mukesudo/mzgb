@@ -3,7 +3,7 @@ import time
 import threading
 import pytest
 
-from logsnap.follow import follow_file
+from mzgb.follow import follow_file
 
 
 class TestFollowFile:

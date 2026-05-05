@@ -10,7 +10,7 @@ from rich.live import Live
 from rich.table import Table
 from rich.text import Text
 
-from logsnap.parser import LogLine
+from mzgb.parser import LogLine
 
 # Update the live display at most this often to avoid overhead on huge files.
 _LIVE_REFRESH_INTERVAL_SECONDS = 0.1

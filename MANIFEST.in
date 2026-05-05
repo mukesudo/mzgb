@@ -1,6 +1,6 @@
 include README.md
 include LICENSE
-recursive-include logsnap *.py
+recursive-include mzgb *.py
 prune agents
 prune tasks
 prune tests

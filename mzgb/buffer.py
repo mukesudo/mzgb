@@ -1,7 +1,7 @@
 from collections import deque
 from typing import Generator, Iterable, Tuple
 
-from logsnap.parser import LogLine
+from mzgb.parser import LogLine
 
 
 def context_window(

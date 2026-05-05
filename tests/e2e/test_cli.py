@@ -5,7 +5,7 @@ import textwrap
 import pytest
 from click.testing import CliRunner
 
-from logsnap.cli import main
+from mzgb.cli import main
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ class TestCLIBasic:
     def test_help_exits_zero(self, runner):
         result = runner.invoke(main, ["--help"])
         assert result.exit_code == 0
-        assert "LogSnap" in result.output
+        assert "mzgb" in result.output
 
     def test_help_shows_flags(self, runner):
         result = runner.invoke(main, ["--help"])
@@ -239,19 +239,19 @@ class TestCLILargeFile:
 
 class TestStreamLines:
     def test_stream_lines_from_file(self, tmp_path):
-        from logsnap.cli import stream_lines
+        from mzgb.cli import stream_lines
         f = tmp_path / "test.log"
         f.write_text("alpha\nbeta\ngamma\n")
         assert list(stream_lines(str(f))) == ["alpha", "beta", "gamma"]
 
     def test_stream_lines_strips_newline(self, tmp_path):
-        from logsnap.cli import stream_lines
+        from mzgb.cli import stream_lines
         f = tmp_path / "test.log"
         f.write_text("hello\n")
         assert list(stream_lines(str(f))) == ["hello"]
 
     def test_stream_lines_gzip(self, tmp_path):
-        from logsnap.cli import stream_lines
+        from mzgb.cli import stream_lines
         f = tmp_path / "test.log.gz"
         with gzip.open(f, "wt") as fh:
             fh.write("compressed\nlines\n")
@@ -321,7 +321,7 @@ class TestCLIEdgeCases:
     def test_version_flag(self, runner):
         result = runner.invoke(main, ["--version"])
         assert result.exit_code == 0
-        assert "logsnap v" in result.output
+        assert "mzgb v" in result.output
 
     def test_summary_with_tty(self, runner, tmp_path, monkeypatch):
         """Exercise summarize_with_progress TTY path."""

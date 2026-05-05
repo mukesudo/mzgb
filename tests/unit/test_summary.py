@@ -5,8 +5,8 @@ from io import StringIO
 
 import pytest
 
-from logsnap.parser import LogLine
-from logsnap.summary import (
+from mzgb.parser import LogLine
+from mzgb.summary import (
     _SPINNER_FRAMES,
     _progress_panel,
     print_summary,

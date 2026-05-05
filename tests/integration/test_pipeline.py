@@ -4,8 +4,8 @@ import pytest
 
 class TestParserFilterIntegration:
     def test_level_filter_on_plaintext_file(self, plaintext_log):
-        from logsnap.parser import detect_format, parse_plaintext_line
-        from logsnap.filters import LevelFilter, FilterPipeline
+        from mzgb.parser import detect_format, parse_plaintext_line
+        from mzgb.filters import LevelFilter, FilterPipeline
 
         lines = plaintext_log.read_text().splitlines()
         fmt = detect_format(lines[:20])
@@ -19,8 +19,8 @@ class TestParserFilterIntegration:
         assert len(matched) == 2
 
     def test_pattern_filter_on_json_file(self, json_log):
-        from logsnap.parser import detect_format, parse_json_line
-        from logsnap.filters import PatternFilter, FilterPipeline
+        from mzgb.parser import detect_format, parse_json_line
+        from mzgb.filters import PatternFilter, FilterPipeline
 
         lines = json_log.read_text().splitlines()
         fmt = detect_format(lines[:20])
@@ -34,8 +34,8 @@ class TestParserFilterIntegration:
         assert "Connection" in matched[0].message
 
     def test_combined_level_and_pattern_filter(self, plaintext_log):
-        from logsnap.parser import parse_plaintext_line
-        from logsnap.filters import LevelFilter, PatternFilter, FilterPipeline
+        from mzgb.parser import parse_plaintext_line
+        from mzgb.filters import LevelFilter, PatternFilter, FilterPipeline
 
         lines = plaintext_log.read_text().splitlines()
         pipeline = FilterPipeline([LevelFilter(["ERROR"]), PatternFilter("Connection")])
@@ -47,13 +47,13 @@ class TestParserFilterIntegration:
 
 class TestStreamingIntegration:
     def test_stream_lines_yields_all_lines(self, plaintext_log):
-        from logsnap.cli import stream_lines
+        from mzgb.cli import stream_lines
         result = list(stream_lines(str(plaintext_log)))
         assert len(result) == 7
 
     def test_stream_large_file_memory(self, large_log):
         import tracemalloc
-        from logsnap.cli import stream_lines
+        from mzgb.cli import stream_lines
 
         tracemalloc.start()
         for _ in stream_lines(str(large_log)):

@@ -2,7 +2,7 @@ import re
 import sys
 from typing import Optional
 
-from logsnap.parser import LogLine
+from mzgb.parser import LogLine
 
 _RESET  = "\033[0m"
 _RED    = "\033[31m"

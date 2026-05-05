@@ -1,4 +1,4 @@
-"""CLI entry point for logsnap — log filtering by level, pattern, and time range."""
+"""CLI entry point for mzgb — log filtering by level, pattern, and time range."""
 import gzip
 import sys
 import time
@@ -9,19 +9,19 @@ import click
 from rich.console import Console
 from rich.text import Text
 
-from logsnap import __version__
-from logsnap.buffer import context_window
-from logsnap.filters import FilterPipeline, LevelFilter, PatternFilter, TimeRangeFilter
-from logsnap.follow import follow_file
-from logsnap.parser import detect_format, parse_line
-from logsnap.renderer import Renderer
-from logsnap.summary import print_summary, summarize_with_progress
+from mzgb import __version__
+from mzgb.buffer import context_window
+from mzgb.filters import FilterPipeline, LevelFilter, PatternFilter, TimeRangeFilter
+from mzgb.follow import follow_file
+from mzgb.parser import detect_format, parse_line
+from mzgb.renderer import Renderer
+from mzgb.summary import print_summary, summarize_with_progress
 
 _console = Console(stderr=True, highlight=False)
 
 
 def _print_banner() -> None:
-    """Print the full logsnap banner (used in help context)."""
+    """Print the full mzgb banner (used in help context)."""
     c = Console(stderr=True, highlight=False, force_terminal=True)
     c.print()
     c.print("""
@@ -38,8 +38,8 @@ def _print_banner() -> None:
                 ▒▒▒▒▒▒                               ▒▒▒▒▒     """)
     t = Text()
     t.append("⚡ ", style="bold yellow")
-    t.append("log", style="bold white")
-    t.append("snap", style="bold cyan")
+    t.append("mz", style="bold white")
+    t.append("gb", style="bold cyan")
     t.append(f"  v{__version__}", style="dim")
     t.append("  ·  MIT  ·  Python 3.9+", style="dim")
     c.print(t)
@@ -52,7 +52,7 @@ def _print_status(msg: str) -> None:
     if _console.is_terminal:
         status = Text()
         status.append("⚡ ", style="bold yellow")
-        status.append("logsnap ", style="bold cyan")
+        status.append("mzgb ", style="bold cyan")
         status.append(f"v{__version__}  ", style="dim")
         status.append(msg, style="dim")
         _console.print(status)
@@ -96,7 +96,7 @@ def _version_callback(ctx: click.Context, _param: Any, value: bool) -> None:
     """Eager callback that prints the version and exits."""
     if not value or ctx.resilient_parsing:
         return
-    click.echo(f"logsnap v{__version__}")
+    click.echo(f"mzgb v{__version__}")
     ctx.exit()
 
 
@@ -105,7 +105,7 @@ def _parse_time_range(
     to_dt: Optional[str],
 ) -> Tuple[Optional[datetime], Optional[datetime]]:
     """Parse --from / --to strings into datetime objects."""
-    from logsnap.parser import normalize_timestamp
+    from mzgb.parser import normalize_timestamp
     from_dt_parsed: Optional[datetime] = None
     to_dt_parsed: Optional[datetime] = None
     if from_dt:
@@ -228,16 +228,16 @@ def _run_context(
 def main(ctx: click.Context, file: Optional[str], level: tuple, pattern: Optional[str],  # noqa: PLR0913
          from_dt: Optional[str], to_dt: Optional[str], context: int,
          follow: bool, summary: bool) -> None:
-    """LogSnap — smart filter for very large log files.
+    """mzgb — smart filter for very large log files.
 
     \b
     Examples:
-      logsnap --level ERROR app.log
-      logsnap --pattern "timeout" --context 3 app.log
-      logsnap --from "2024-01-15 14:00" --to "2024-01-15 15:00" app.log
-      logsnap --summary app.log
-      logsnap --follow --level ERROR app.log
-      cat app.log | logsnap --pattern "connection refused"
+      mzgb --level ERROR app.log
+      mzgb --pattern "timeout" --context 3 app.log
+      mzgb --from "2024-01-15 14:00" --to "2024-01-15 15:00" app.log
+      mzgb --summary app.log
+      mzgb --follow --level ERROR app.log
+      cat app.log | mzgb --pattern "connection refused"
     """
     _print_status(f"reading {file!r}" if file else "reading from stdin")
 

@@ -3,10 +3,10 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["logsnap*"]
+include = ["mzgb*"]
 
 [project]
-name = "logsnap"
+name = "mzgb"
 version = "0.1.0"
 description = "Smart CLI for filtering and navigating very large log files"
 requires-python = ">=3.9"
@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-logsnap = "logsnap.cli:main"
+mzgb = "mzgb.cli:main"
 
 [project.optional-dependencies]
 dev = [
@@ -26,16 +26,16 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mukesudo/logsnap"
-Repository = "https://github.com/mukesudo/logsnap"
-Issues = "https://github.com/mukesudo/logsnap/issues"
+Homepage = "https://github.com/mukesudo/mzgb"
+Repository = "https://github.com/mukesudo/mzgb"
+Issues = "https://github.com/mukesudo/mzgb/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--tb=short -q"
 
 [tool.coverage.run]
-source = ["logsnap"]
+source = ["mzgb"]
 omit = ["tests/*"]
 
 [tool.coverage.report]

@@ -1,7 +1,7 @@
 """Unit tests — context window (Phase 7)."""
-from logsnap.buffer import context_window
-from logsnap.filters import FilterPipeline, PatternFilter
-from logsnap.parser import LogLine
+from mzgb.buffer import context_window
+from mzgb.filters import FilterPipeline, PatternFilter
+from mzgb.parser import LogLine
 
 
 def _make(level: str, msg: str) -> LogLine:

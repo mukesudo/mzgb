@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from typing import List, Optional
 
-from logsnap.parser import LogLine
+from mzgb.parser import LogLine
 
 
 class LevelFilter:

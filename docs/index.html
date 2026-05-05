@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>logsnap — CLI log filtering tool</title>
+  <title>mzgb — CLI log filtering tool</title>
   <meta name="description" content="A CLI tool for filtering large log files by level, pattern, and time range. Streams line by line — works on files of any size." />
-  <link rel="canonical" href="https://logsnap.netlify.app" />
+  <link rel="canonical" href="https://mzgb.netlify.app" />
 
   <!-- Open Graph (Slack, LinkedIn, Facebook, iMessage) -->
   <meta property="og:type"        content="website" />
-  <meta property="og:url"         content="https://logsnap.netlify.app" />
-  <meta property="og:title"       content="logsnap — CLI log filtering tool" />
+  <meta property="og:url"         content="https://mzgb.netlify.app" />
+  <meta property="og:title"       content="mzgb — CLI log filtering tool" />
   <meta property="og:description" content="Filter large log files by level, pattern, and time range. Streams line by line — no memory issues. MIT, Python 3.9+." />
-  <meta property="og:image"       content="https://opengraph.githubassets.com/1/mukesudo/logsnap" />
+  <meta property="og:image"       content="https://opengraph.githubassets.com/1/mukesudo/mzgb" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image" />
-  <meta name="twitter:title"       content="logsnap — CLI log filtering tool" />
+  <meta name="twitter:title"       content="mzgb — CLI log filtering tool" />
   <meta name="twitter:description" content="Filter large log files by level, pattern, and time range. Streams line by line — no memory issues. MIT, Python 3.9+." />
-  <meta name="twitter:image"       content="https://opengraph.githubassets.com/1/mukesudo/logsnap" />
+  <meta name="twitter:image"       content="https://opengraph.githubassets.com/1/mukesudo/mzgb" />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -210,11 +210,11 @@
 
 <header>
   <div class="header-inner">
-    <span class="logo">logsnap</span>
+    <span class="logo">mzgb</span>
     <nav>
       <a href="#usage">Usage</a>
       <a href="#install">Install</a>
-      <a href="https://github.com/mukesudo/logsnap" target="_blank">GitHub</a>
+      <a href="https://github.com/mukesudo/mzgb" target="_blank">GitHub</a>
     </nav>
   </div>
 </header>
@@ -228,11 +228,11 @@
       <span class="badge badge-ver">v0.1.0</span>
       <span class="badge badge-mit">MIT</span>
     </div>
-    <h1>logsnap</h1>
+    <h1>mzgb</h1>
     <p class="sub">A CLI tool for filtering large log files by level, pattern, and time range. Streams line by line — no memory issues with large files.</p>
     <div class="actions">
       <a href="#install" class="btn">Get started</a>
-      <a href="https://github.com/mukesudo/logsnap" target="_blank" class="btn-ghost">View source</a>
+      <a href="https://github.com/mukesudo/mzgb" target="_blank" class="btn-ghost">View source</a>
     </div>
 
     <div class="term">
@@ -251,7 +251,7 @@
       <div class="block">
         <div class="block-title">Filter by log level</div>
         <div class="block-body">
-<span class="dim">$</span> logsnap <span class="flag">--level</span> <span class="arg">ERROR</span> app.log
+<span class="dim">$</span> mzgb <span class="flag">--level</span> <span class="arg">ERROR</span> app.log
 
 <span class="err">[ERROR] 14:00:04  Connection timeout</span>
 <span class="err">[ERROR] 14:00:06  DB query failed</span>
@@ -262,7 +262,7 @@
       <div class="block">
         <div class="block-title">Pattern search with context</div>
         <div class="block-body">
-<span class="dim">$</span> logsnap <span class="flag">--pattern</span> <span class="arg">"timeout"</span> <span class="flag">-C</span> <span class="arg">1</span> app.log
+<span class="dim">$</span> mzgb <span class="flag">--pattern</span> <span class="arg">"timeout"</span> <span class="flag">-C</span> <span class="arg">1</span> app.log
 
 <span class="ok">[INFO]  14:00:03  Retrying connection...</span>
 <span class="err">[ERROR] 14:00:04  Connection timeout</span>
@@ -273,7 +273,7 @@
       <div class="block">
         <div class="block-title">Filter by time range</div>
         <div class="block-body">
-<span class="dim">$</span> logsnap <span class="flag">--from</span> <span class="arg">"14:00"</span> <span class="flag">--to</span> <span class="arg">"14:30"</span> app.log
+<span class="dim">$</span> mzgb <span class="flag">--from</span> <span class="arg">"14:00"</span> <span class="flag">--to</span> <span class="arg">"14:30"</span> app.log
 
 <span class="ok">[INFO]  14:00:01  Server started</span>
 <span class="ok">[INFO]  14:15:22  User login</span>
@@ -284,9 +284,9 @@
       <div class="block">
         <div class="block-title">Works with pipes</div>
         <div class="block-body">
-<span class="dim">$</span> kubectl logs pod/api | logsnap <span class="flag">--level</span> <span class="arg">ERROR</span>
-<span class="dim">$</span> journalctl | logsnap <span class="flag">--summary</span>
-<span class="dim">$</span> cat *.log | logsnap <span class="flag">--pattern</span> <span class="arg">"OOM"</span>
+<span class="dim">$</span> kubectl logs pod/api | mzgb <span class="flag">--level</span> <span class="arg">ERROR</span>
+<span class="dim">$</span> journalctl | mzgb <span class="flag">--summary</span>
+<span class="dim">$</span> cat *.log | mzgb <span class="flag">--pattern</span> <span class="arg">"OOM"</span>
         </div>
       </div>
 
@@ -311,17 +311,17 @@
     <div class="block">
       <div class="block-title">From source</div>
       <div class="block-body">
-<span class="dim">$</span> git clone https://github.com/mukesudo/logsnap.git
-<span class="dim">$</span> cd logsnap
-<span class="dim">$</span> python3 -m logsnap --help
+<span class="dim">$</span> git clone https://github.com/mukesudo/mzgb.git
+<span class="dim">$</span> cd mzgb
+<span class="dim">$</span> python3 -m mzgb --help
       </div>
     </div>
 
     <div class="block" style="margin-top:1rem">
       <div class="block-title">Via pip</div>
       <div class="block-body">
-<span class="dim">$</span> pip install logsnap
-<span class="dim">$</span> logsnap --help
+<span class="dim">$</span> pip install mzgb
+<span class="dim">$</span> mzgb --help
       </div>
     </div>
   </section>
@@ -330,18 +330,18 @@
 
 <footer>
   <p>
-    <a href="https://github.com/mukesudo/logsnap" target="_blank">GitHub</a> &middot;
-    <a href="https://github.com/mukesudo/logsnap/issues" target="_blank">Issues</a> &middot;
-    <a href="https://pypi.org/project/logsnap" target="_blank">PyPI</a>
+    <a href="https://github.com/mukesudo/mzgb" target="_blank">GitHub</a> &middot;
+    <a href="https://github.com/mukesudo/mzgb/issues" target="_blank">Issues</a> &middot;
+    <a href="https://pypi.org/project/mzgb" target="_blank">PyPI</a>
   </p>
   <p class="dim" style="margin-top:0.5rem">v0.1.0 &middot; MIT License &middot; by Mukhtar Saeed</p>
 </footer>
 
 <script>
   const commands = [
-    'logsnap --level ERROR app.log',
-    'logsnap --pattern "timeout" -C 2 app.log',
-    'cat server.log | logsnap --summary',
+    'mzgb --level ERROR app.log',
+    'mzgb --pattern "timeout" -C 2 app.log',
+    'cat server.log | mzgb --summary',
   ];
   let ci = 0, ci2 = 0;
   const el = document.getElementById('typed');
