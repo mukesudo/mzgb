@@ -13,7 +13,7 @@
 #   2. Runs pylint on each changed file
 #   3. Runs AST-based structural analysis (nesting, length, docstrings, type hints)
 #   4. Produces a structured report with PASS / WARN / BLOCK verdicts
-#   5. Posts the report to #logsnap-integration on Matrix
+#   5. Posts the report to #mzgb-integration on Matrix
 #   6. Exits non-zero if any BLOCK-level findings exist
 #
 # Usage (from post-commit hook):
@@ -376,7 +376,7 @@ def format_report(report: ReviewReport) -> str:
 # ── Matrix poster ──────────────────────────────────────────────────────────────
 
 def post_to_matrix(report_text: str) -> None:
-    """Post report to #logsnap-integration. Fails silently if Matrix is down."""
+    """Post report to #mzgb-integration. Fails silently if Matrix is down."""
     try:
         import asyncio
         import time
@@ -405,7 +405,7 @@ def post_to_matrix(report_text: str) -> None:
 
                 # Resolve room alias to ID
                 async with session.get(
-                    f"{MATRIX_HOMESERVER}/_matrix/client/v3/directory/room/%23logsnap-integration%3Alocalhost",
+                    f"{MATRIX_HOMESERVER}/_matrix/client/v3/directory/room/%23mzgb-integration%3Alocalhost",
                     headers={"Authorization": f"Bearer {token}"},
                 ) as resp:
                     room_data = await resp.json()

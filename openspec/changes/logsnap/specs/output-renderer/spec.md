@@ -33,7 +33,7 @@ The system SHALL render timestamps in a dimmed style to reduce visual noise, and
 The tool SHALL provide `--help` output that allows a new user to run a useful query within 2 minutes of first install.
 
 #### Scenario: Help shows examples
-- **WHEN** the user runs `logsnap --help`
+- **WHEN** the user runs `mzgb --help`
 - **THEN** the help output SHALL include at least 3 concrete usage examples covering the most common flags
 
 ### Requirement: Graceful error handling

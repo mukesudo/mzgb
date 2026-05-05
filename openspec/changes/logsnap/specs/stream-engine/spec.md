@@ -4,11 +4,11 @@
 The system SHALL read log files line-by-line using a generator, keeping memory usage below 50 MB RSS regardless of file size.
 
 #### Scenario: Processing a 5 GB file
-- **WHEN** the user runs `logsnap` on a 5 GB log file
+- **WHEN** the user runs `mzgb` on a 5 GB log file
 - **THEN** memory usage SHALL remain below 50 MB RSS throughout processing
 
 #### Scenario: Processing via stdin
-- **WHEN** the user pipes log content into `logsnap` via stdin
+- **WHEN** the user pipes log content into `mzgb` via stdin
 - **THEN** the tool SHALL read from stdin line-by-line without buffering the full stream
 
 ### Requirement: First result latency

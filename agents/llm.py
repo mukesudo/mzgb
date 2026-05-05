@@ -1,5 +1,5 @@
 """
-agents/llm.py — Unified LLM caller for all LogSnap agents.
+agents/llm.py — Unified LLM caller for all mzgb agents.
 
 Supports:
   - Groq  (llama-3.1-70b-versatile, mixtral-8x7b) — fast, free tier

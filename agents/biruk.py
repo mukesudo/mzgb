@@ -7,19 +7,19 @@
 # before writing a single line and posts blockers immediately.
 #
 # Responsibilities:
-#   - All code in logsnap/parser.py, logsnap/filters.py, logsnap/cli.py (stream_lines)
+#   - All code in mzgb/parser.py, mzgb/filters.py, mzgb/cli.py (stream_lines)
 #   - Phases 2, 3, 4 from tasks/backend.md
 #   - Unblocks Liya (CLI) and Tigist (Features) by completing the core pipeline
 #
 # Tools Available:
-#   - Read/write: logsnap/parser.py, logsnap/filters.py, logsnap/cli.py
+#   - Read/write: mzgb/parser.py, mzgb/filters.py, mzgb/cli.py
 #   - Test runner: tests/unit/test_parser.py, tests/unit/test_filters.py
-#   - Matrix rooms: #logsnap-backend, #logsnap-integration, #logsnap-blockers
+#   - Matrix rooms: #mzgb-backend, #mzgb-integration, #mzgb-blockers
 #
 # Interfaces:
-#   - Posts "READY: <module>" to #logsnap-integration when a phase is done
-#   - Listens on #logsnap-backend for spec clarifications
-#   - Posts to #logsnap-blockers if a design decision is unclear
+#   - Posts "READY: <module>" to #mzgb-integration when a phase is done
+#   - Listens on #mzgb-backend for spec clarifications
+#   - Posts to #mzgb-blockers if a design decision is unclear
 #   - Liya listens for "READY: filters" before wiring CLI flags
 #   - Tigist listens for "READY: filters" before starting Phase 7
 """
@@ -85,7 +85,7 @@ async def work_cycle(matrix: AgentMatrixClient) -> None:
         await matrix.send(
             ROOMS["backend"],
             f"🔧 [{task.id}] Implementing: {task.description}\n"
-            f"  Files: logsnap/parser.py | logsnap/filters.py | logsnap/cli.py\n"
+            f"  Files: mzgb/parser.py | mzgb/filters.py | mzgb/cli.py\n"
             f"  Reply DONE:{task.id} when implementation is confirmed."
         )
 
@@ -141,7 +141,7 @@ async def main():
         ROOMS["general"],
         f"👋 Biruk here (Backend). Online and ready.\n"
         f"  Track: backend | {s.get('DONE', 0)} done, {s.get('OPEN', 0)} open.\n"
-        f"  I own: logsnap/parser.py, logsnap/filters.py, stream_lines()\n"
+        f"  I own: mzgb/parser.py, mzgb/filters.py, stream_lines()\n"
         f"  Autonomous mode ON - claiming tasks from queue."
     )
 

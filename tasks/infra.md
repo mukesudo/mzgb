@@ -7,10 +7,10 @@
 
 ## Phase 1 — Project Infrastructure
 
-- [x] 1.1 Create `pyproject.toml` with package metadata, entry point `logsnap`, and dependencies (`click`, `rich`, `python-dateutil`)
-- [ ] 1.2 Create `logsnap/` package directory with `__init__.py` and `__main__.py` (entry point for `python -m logsnap`)
+- [x] 1.1 Create `pyproject.toml` with package metadata, entry point `mzgb`, and dependencies (`click`, `rich`, `python-dateutil`)
+- [ ] 1.2 Create `mzgb/` package directory with `__init__.py` and `__main__.py` (entry point for `python -m mzgb`)
 - [ ] 1.3 Create placeholder module files: `cli.py`, `parser.py`, `filters.py`, `buffer.py`, `follow.py`, `summary.py`, `renderer.py`
-- [ ] 1.4 Install the package in editable mode (`pip install -e .`) and verify `logsnap --help` runs without error
+- [ ] 1.4 Install the package in editable mode (`pip install -e .`) and verify `mzgb --help` runs without error
 
 ## Phase 10 — Polish and Robustness
 

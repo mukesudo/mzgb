@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# start_agents.sh — Launch all LogSnap agents in the background.
+# start_agents.sh — Launch all mzgb agents in the background.
 # Logs go to logs/agent_<name>.log
 # Safe to run before sleep — agents survive terminal close.
 #
@@ -16,7 +16,7 @@ mkdir -p "$LOGS"
 AGENTS=(natnael biruk liya tigist endalk selam abel)
 
 start_all() {
-    echo "Starting LogSnap agents..."
+    echo "Starting mzgb agents..."
     for agent in "${AGENTS[@]}"; do
         LOG="$LOGS/agent_${agent}.log"
         PID_FILE="$LOGS/${agent}.pid"
@@ -40,7 +40,7 @@ start_all() {
 }
 
 stop_all() {
-    echo "Stopping LogSnap agents..."
+    echo "Stopping mzgb agents..."
     for agent in "${AGENTS[@]}"; do
         PID_FILE="$LOGS/${agent}.pid"
         if [[ -f "$PID_FILE" ]]; then
@@ -57,7 +57,7 @@ stop_all() {
 }
 
 status_all() {
-    echo "LogSnap agent status:"
+    echo "mzgb agent status:"
     for agent in "${AGENTS[@]}"; do
         PID_FILE="$LOGS/${agent}.pid"
         if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then

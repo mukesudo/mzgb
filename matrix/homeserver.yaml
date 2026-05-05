@@ -22,9 +22,9 @@ listeners:
       - names: [client, federation]
         compress: false
 
-registration_shared_secret: "logsnap-dev-secret-change-in-prod"
-macaroon_secret_key: "logsnap-macaroon-secret-change-in-prod"
-form_secret: "logsnap-form-secret-change-in-prod"
+registration_shared_secret: "mzgb-dev-secret-change-in-prod"
+macaroon_secret_key: "mzgb-macaroon-secret-change-in-prod"
+form_secret: "mzgb-form-secret-change-in-prod"
 report_stats: false
 
 # Allow open registration for local agent accounts

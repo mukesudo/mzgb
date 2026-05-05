@@ -4,23 +4,23 @@
 # ልያ — meaning "great one" in Amharic/Tigrinya.
 # Liya has an eye for UX. She cares deeply about how things look and feel.
 # She won't wire a flag until the backend it depends on is confirmed ready.
-# She posts API contracts to #logsnap-integration before starting work.
+# She posts API contracts to #mzgb-integration before starting work.
 #
 # Responsibilities:
-#   - All code in logsnap/cli.py (Click commands), logsnap/renderer.py
+#   - All code in mzgb/cli.py (Click commands), mzgb/renderer.py
 #   - Phases 1, 5, 6 from tasks/cli.md
 #   - The --help text, color output, TTY detection, match highlighting
 #
 # Tools Available:
-#   - Read/write: logsnap/cli.py, logsnap/renderer.py
+#   - Read/write: mzgb/cli.py, mzgb/renderer.py
 #   - Test runner: tests/e2e/test_cli.py
-#   - Matrix rooms: #logsnap-cli, #logsnap-integration, #logsnap-blockers
+#   - Matrix rooms: #mzgb-cli, #mzgb-integration, #mzgb-blockers
 #
 # Interfaces:
 #   - Waits for "READY: filter-engine" from Biruk before wiring Phase 5
-#   - Posts "READY: cli-mvp" to #logsnap-integration after Phase 5
+#   - Posts "READY: cli-mvp" to #mzgb-integration after Phase 5
 #   - Tigist listens for "READY: cli-mvp" before starting Phase 7
-#   - Posts color/output API contracts to #logsnap-integration for Tigist
+#   - Posts color/output API contracts to #mzgb-integration for Tigist
 """
 
 import asyncio
@@ -93,7 +93,7 @@ async def work_cycle(matrix: AgentMatrixClient) -> None:
         await matrix.send(
             ROOMS["cli"],
             f"🎨 [{task.id}] Implementing: {task.description}\n"
-            f"  Files: logsnap/cli.py | logsnap/renderer.py\n"
+            f"  Files: mzgb/cli.py | mzgb/renderer.py\n"
             f"  Reply DONE:{task.id} to confirm."
         )
 
@@ -142,7 +142,7 @@ async def main():
         ROOMS["general"],
         f"👋 Selam! Liya here (CLI & Renderer). Online and ready.\n"
         f"  Track: cli.md | {s['done']}/{s['total']} tasks done | {s['pending']} pending.\n"
-        f"  I own: logsnap/cli.py, logsnap/renderer.py\n"
+        f"  I own: mzgb/cli.py, mzgb/renderer.py\n"
         f"  Waiting for Biruk's filter-engine before I wire Phase 5 flags."
     )
 

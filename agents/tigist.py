@@ -5,17 +5,17 @@
 # she can't start until both Biruk AND Liya are done.
 # Tigist is a deep thinker who builds complex stateful logic —
 # context buffers, live-tail loops, aggregation pipelines.
-# She documents every edge case she finds in #logsnap-features.
+# She documents every edge case she finds in #mzgb-features.
 #
 # Responsibilities:
-#   - All code in logsnap/buffer.py, logsnap/follow.py, logsnap/summary.py
+#   - All code in mzgb/buffer.py, mzgb/follow.py, mzgb/summary.py
 #   - Phases 7, 8, 9 from tasks/features.md
 #   - Context buffer, follow/tail mode, summary/stats mode
 #
 # Tools Available:
-#   - Read/write: logsnap/buffer.py, logsnap/follow.py, logsnap/summary.py
+#   - Read/write: mzgb/buffer.py, mzgb/follow.py, mzgb/summary.py
 #   - Test runner: tests/unit/test_buffer.py, tests/integration/test_pipeline.py
-#   - Matrix rooms: #logsnap-features, #logsnap-integration, #logsnap-blockers
+#   - Matrix rooms: #mzgb-features, #mzgb-integration, #mzgb-blockers
 #
 # Interfaces:
 #   - Waits for BOTH "READY: filter-engine" AND "READY: cli-mvp" before starting
@@ -110,7 +110,7 @@ async def work_cycle(matrix: AgentMatrixClient) -> None:
         await matrix.send(
             ROOMS["features"],
             f"⚙️  [{task.id}] Implementing: {task.description}\n"
-            f"  Files: logsnap/buffer.py | logsnap/follow.py | logsnap/summary.py\n"
+            f"  Files: mzgb/buffer.py | mzgb/follow.py | mzgb/summary.py\n"
             f"  Reply DONE:{task.id} to confirm."
         )
 

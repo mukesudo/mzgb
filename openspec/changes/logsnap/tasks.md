@@ -1,16 +1,16 @@
 ## 1. Project Infrastructure
 
-- [ ] 1.1 Create `pyproject.toml` with package metadata, entry point `logsnap`, and dependencies (`click`, `rich`, `python-dateutil`)
-- [ ] 1.2 Create `logsnap/` package directory with `__init__.py` and `__main__.py` (entry point for `python -m logsnap`)
+- [ ] 1.1 Create `pyproject.toml` with package metadata, entry point `mzgb`, and dependencies (`click`, `rich`, `python-dateutil`)
+- [ ] 1.2 Create `mzgb/` package directory with `__init__.py` and `__main__.py` (entry point for `python -m mzgb`)
 - [ ] 1.3 Create placeholder module files: `cli.py`, `parser.py`, `filters.py`, `buffer.py`, `follow.py`, `summary.py`, `renderer.py`
-- [ ] 1.4 Install the package in editable mode (`pip install -e .`) and verify `logsnap --help` runs without error
+- [ ] 1.4 Install the package in editable mode (`pip install -e .`) and verify `mzgb --help` runs without error
 
 ## 2. Streaming Engine
 
 - [ ] 2.1 Implement `stream_lines(source)` generator in `cli.py` that accepts a file path or stdin and yields raw text lines one at a time
 - [ ] 2.2 Add error handling for permission denied and binary/non-UTF-8 content (decode with replacement, warn to stderr)
 - [ ] 2.3 Add error for no-input case (no file path and stdin is a TTY): print clear message and exit non-zero
-- [ ] 2.4 Write a manual smoke test: pipe a large file through `logsnap` and confirm memory stays flat
+- [ ] 2.4 Write a manual smoke test: pipe a large file through `mzgb` and confirm memory stays flat
 
 ## 3. Log Parser
 
@@ -33,9 +33,9 @@
 ## 5. MVP CLI — Phase 1 Complete
 
 - [ ] 5.1 Wire the full pipeline in `cli.py`: `stream_lines` → `detect_format` → `parse` → `FilterPipeline` → print raw output
-- [ ] 5.2 Verify end-to-end: `logsnap --level ERROR app.log` returns only error lines
-- [ ] 5.3 Verify end-to-end: `cat app.log | logsnap --pattern "timeout"` works via stdin
-- [ ] 5.4 Verify end-to-end: `logsnap --from "2024-01-15 14:00" --to "2024-01-15 15:00" app.log` filters by time window
+- [ ] 5.2 Verify end-to-end: `mzgb --level ERROR app.log` returns only error lines
+- [ ] 5.3 Verify end-to-end: `cat app.log | mzgb --pattern "timeout"` works via stdin
+- [ ] 5.4 Verify end-to-end: `mzgb --from "2024-01-15 14:00" --to "2024-01-15 15:00" app.log` filters by time window
 
 ## 6. Output Renderer
 
@@ -43,7 +43,7 @@
 - [ ] 6.2 Add per-level color mapping: ERROR/FATAL=red, WARN=yellow, INFO=green, DEBUG=dim grey
 - [ ] 6.3 Implement match highlighting: bold/underline the matched substring when `--pattern` is active and stdout is a TTY
 - [ ] 6.4 Render timestamps in dimmed style to reduce visual noise
-- [ ] 6.5 Verify plain-text fallback: `logsnap --level ERROR app.log | cat` produces no ANSI escape codes
+- [ ] 6.5 Verify plain-text fallback: `mzgb --level ERROR app.log | cat` produces no ANSI escape codes
 - [ ] 6.6 Add at least 3 concrete usage examples to `--help` text in `cli.py`
 
 ## 7. Context Buffer
@@ -52,7 +52,7 @@
 - [ ] 7.2 Implement post-match countdown counter to collect N lines after each match
 - [ ] 7.3 Implement overlap detection: when two match windows are adjacent, merge without inserting a `--` separator
 - [ ] 7.4 Render context lines in dimmed style distinct from match lines
-- [ ] 7.5 Wire `-C / --context N` Click option and verify: `logsnap -C 3 --pattern "ERROR" app.log` shows 3 lines before and after each match
+- [ ] 7.5 Wire `-C / --context N` Click option and verify: `mzgb -C 3 --pattern "ERROR" app.log` shows 3 lines before and after each match
 
 ## 8. Follow / Tail Mode
 
@@ -60,7 +60,7 @@
 - [ ] 8.2 Implement polling follow loop: `seek` to end of file, sleep 100 ms, read new lines, feed through filter pipeline
 - [ ] 8.3 Implement rotation detection: if current file size < last read position, seek to 0 and re-read from start
 - [ ] 8.4 Handle `KeyboardInterrupt` (Ctrl+C) cleanly: print nothing extra, exit with code 0
-- [ ] 8.5 Wire `--follow` Click flag and verify: `logsnap --follow --level ERROR app.log` streams new errors in real time
+- [ ] 8.5 Wire `--follow` Click flag and verify: `mzgb --follow --level ERROR app.log` streams new errors in real time
 
 ## 9. Summary Mode
 
@@ -68,8 +68,8 @@
 - [ ] 9.2 Implement top-5 pattern extraction: normalize messages (strip numbers/UUIDs), count occurrences, return top 5
 - [ ] 9.3 Render summary as two `rich.table.Table` instances: level counts and top patterns
 - [ ] 9.4 Implement exit-code logic: exit with code 1 if any ERROR or FATAL lines were counted
-- [ ] 9.5 Verify: `logsnap --summary app.log` prints tables; exit code is 1 when errors present, 0 otherwise
-- [ ] 9.6 Verify: `logsnap --summary --level WARN app.log` counts only WARN lines
+- [ ] 9.5 Verify: `mzgb --summary app.log` prints tables; exit code is 1 when errors present, 0 otherwise
+- [ ] 9.6 Verify: `mzgb --summary --level WARN app.log` counts only WARN lines
 
 ## 10. Polish and Robustness
 

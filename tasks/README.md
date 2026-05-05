@@ -1,7 +1,7 @@
 # Task Coordination
 
-Multi-agent task tracks for parallel implementation of LogSnap.
-`openspec/changes/logsnap/tasks.md` is the **single source of truth**.
+Multi-agent task tracks for parallel implementation of mzgb.
+`openspec/changes/mzgb/tasks.md` is the **single source of truth**.
 Track files here are read-only work queues for each agent/person.
 
 ## Track Files
@@ -32,7 +32,7 @@ Open the relevant track file and append a checkbox under the correct phase:
 - [ ] 7.6 Description of the new task
 ```
 
-Then mirror it in `openspec/changes/logsnap/tasks.md` under the same phase
+Then mirror it in `openspec/changes/mzgb/tasks.md` under the same phase
 to keep the source of truth in sync.
 
 ## Syncing Checkboxes
@@ -62,6 +62,6 @@ Example:
 ```markdown
 - [ ] T-06 [follow] Follow mode streams new lines in real time
   - Setup: `touch /tmp/live.log`
-  - Command: run `logsnap --follow /tmp/live.log` in one terminal, append lines in another
+  - Command: run `mzgb --follow /tmp/live.log` in one terminal, append lines in another
   - Expect: new lines appear immediately (within ~100 ms)
 ```

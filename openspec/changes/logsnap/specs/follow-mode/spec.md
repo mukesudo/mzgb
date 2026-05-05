@@ -4,11 +4,11 @@
 The system SHALL support streaming new lines appended to a file in real time via `--follow`, applying all active filters to each new line.
 
 #### Scenario: Follow mode streams new lines
-- **WHEN** the user runs `logsnap --follow app.log`
+- **WHEN** the user runs `mzgb --follow app.log`
 - **THEN** the tool SHALL print any new lines (that pass active filters) as they are appended to the file
 
 #### Scenario: Follow mode with filters
-- **WHEN** the user runs `logsnap --follow --level ERROR app.log`
+- **WHEN** the user runs `mzgb --follow --level ERROR app.log`
 - **THEN** only new ERROR lines SHALL be printed in real time
 
 #### Scenario: Follow mode exits on Ctrl+C

@@ -1,10 +1,10 @@
 """
-autonomous_loop.py — Self-driving work loop for LogSnap agents.
+autonomous_loop.py — Self-driving work loop for mzgb agents.
 
 Each agent calls run_autonomous_loop(matrix, track) and it will:
   1. Claim the next available task from QUEUE.json for this track
   2. Post "I'm working on X" to the track room + general
-  3. Post IMPLEMENT:task_id|title|files to #logsnap-integration
+  3. Post IMPLEMENT:task_id|title|files to #mzgb-integration
      (Cascade reads this and writes the actual code)
   4. Wait for CODE_READY:task_id signal (Cascade posts this when done)
   5. Run the tests

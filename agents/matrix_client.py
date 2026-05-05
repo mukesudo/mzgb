@@ -1,5 +1,5 @@
 """
-Base Matrix client for LogSnap agents.
+Base Matrix client for mzgb agents.
 Uses matrix-nio (async Python Matrix client library).
 """
 
@@ -62,7 +62,7 @@ class AgentMatrixClient:
         room_id = self._room_ids.get(room_alias)
         if not room_id:
             room_id = await self.join_room(room_alias)
-        txn_id = f"logsnap_{int(time.time() * 1000)}"
+        txn_id = f"mzgb_{int(time.time() * 1000)}"
         url = f"{self.homeserver}/_matrix/client/v3/rooms/{room_id}/send/m.room.message/{txn_id}"
         headers = {"Authorization": f"Bearer {self._access_token}"}
         payload = {"msgtype": "m.text", "body": message}

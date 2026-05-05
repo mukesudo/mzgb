@@ -11,10 +11,10 @@
 #   - Listen for REVIEW: signals from implementation agents
 #   - Check that tests exist and pass for the task
 #   - Check for common anti-patterns (hardcoded paths, bare except, etc.)
-#   - Approve → post MERGE: to #logsnap-integration
+#   - Approve → post MERGE: to #mzgb-integration
 #   - Request changes → post back to agent's room
 #
-# Matrix rooms: #logsnap-integration, #logsnap-blockers, all agent rooms
+# Matrix rooms: #mzgb-integration, #mzgb-blockers, all agent rooms
 """
 
 import ast

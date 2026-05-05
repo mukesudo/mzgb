@@ -2,7 +2,7 @@
 # Agent: Endalk (Release Manager)
 #
 # ኤንዳልካቸው — "He who leads the people"
-# Endalk is the gatekeeper. He watches #logsnap-integration for READY signals,
+# Endalk is the gatekeeper. He watches #mzgb-integration for READY signals,
 # sequences git merges to avoid conflicts, runs the full test suite after each
 # merge, maintains the changelog, and posts the final SHIP-READY signal.
 # Nothing merges to main without passing through Endalk.
@@ -12,10 +12,10 @@
 #   - Sequence commits to avoid touching same files simultaneously
 #   - Run full test suite after each merge
 #   - Maintain CHANGELOG.md
-#   - Post merge results to #logsnap-integration
+#   - Post merge results to #mzgb-integration
 #   - Update PM Dashboard after every merge
 #
-# Matrix rooms: #logsnap-integration, #logsnap-general, #logsnap-blockers
+# Matrix rooms: #mzgb-integration, #mzgb-general, #mzgb-blockers
 """
 
 import asyncio
@@ -47,13 +47,13 @@ def update_changelog(task_id: str, title: str, agent: str) -> None:
         existing = CHANGELOG.read_text()
         CHANGELOG.write_text(existing + entry)
     else:
-        CHANGELOG.write_text(f"# LogSnap Changelog\n{entry}")
+        CHANGELOG.write_text(f"# mzgb Changelog\n{entry}")
 
 
 def run_tests() -> tuple[bool, str]:
     result = subprocess.run(
         [sys.executable, "-m", "pytest", "tests/", "-q", "--tb=short",
-         "--cov=logsnap", "--cov-report=term-missing:skip-covered"],
+         "--cov=mzgb", "--cov-report=term-missing:skip-covered"],
         capture_output=True, text=True, cwd=ROOT
     )
     return result.returncode == 0, (result.stdout + result.stderr).strip()
@@ -119,7 +119,7 @@ async def update_dashboard(matrix: AgentMatrixClient) -> None:
     dashboard = DASHBOARD
     dashboard.parent.mkdir(exist_ok=True)
     dashboard.write_text(
-        f"# LogSnap PM Dashboard\n"
+        f"# mzgb PM Dashboard\n"
         f"_Updated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}_\n\n"
         f"## Progress\n"
         f"- **{done}/{total} tasks done** ({pct}%)\n"
@@ -132,9 +132,9 @@ async def update_dashboard(matrix: AgentMatrixClient) -> None:
         f"- Selam (Reviewer) — code review gate\n"
         f"- Endalk (Release) — merge sequencer\n\n"
         f"## Rooms\n"
-        f"- #logsnap-general — announcements\n"
-        f"- #logsnap-integration — READY/MERGE signals\n"
-        f"- #logsnap-blockers — failures and escalations\n"
+        f"- #mzgb-general — announcements\n"
+        f"- #mzgb-integration — READY/MERGE signals\n"
+        f"- #mzgb-blockers — failures and escalations\n"
     )
     await matrix.send(ROOMS["general"],
         f"📊 Dashboard updated: {done}/{total} tasks done ({pct}%)\n"
@@ -156,7 +156,7 @@ async def main():
     await matrix.send(ROOMS["general"],
         "🔀 Selam! Endalk here (Release Manager). Online.\n"
         "  I sequence merges, run tests after each, and maintain the changelog.\n"
-        "  Listening for MERGE: signals in #logsnap-integration."
+        "  Listening for MERGE: signals in #mzgb-integration."
     )
 
     await update_dashboard(matrix)

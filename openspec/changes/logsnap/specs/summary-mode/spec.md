@@ -4,7 +4,7 @@
 The system SHALL support a `--summary` flag that, instead of printing matched lines, prints a table of match counts grouped by log level.
 
 #### Scenario: Summary table output
-- **WHEN** the user runs `logsnap --summary app.log`
+- **WHEN** the user runs `mzgb --summary app.log`
 - **THEN** a table SHALL be printed showing each level and the count of matched lines for that level
 
 #### Scenario: Summary respects active filters

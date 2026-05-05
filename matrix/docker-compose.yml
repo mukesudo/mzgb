@@ -1,7 +1,7 @@
 services:
   synapse-init:
     image: alpine:latest
-    container_name: logsnap-synapse-init
+    container_name: mzgb-synapse-init
     command: ["chown", "-R", "991:991", "/data"]
     volumes:
       - synapse_data:/data
@@ -9,7 +9,7 @@ services:
 
   synapse:
     image: matrixdotorg/synapse:latest
-    container_name: logsnap-synapse
+    container_name: mzgb-synapse
     restart: unless-stopped
     depends_on:
       synapse-init:

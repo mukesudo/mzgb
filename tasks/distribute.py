@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-distribute.py — sync task files from openspec/changes/logsnap/tasks.md
+distribute.py — sync task files from openspec/changes/mzgb/tasks.md
 into track-specific files in tasks/.
 
 Usage:
@@ -20,7 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 
-TASKS_MD = ROOT / "openspec/changes/logsnap/tasks.md"
+TASKS_MD = ROOT / "openspec/changes/mzgb/tasks.md"
 TRACKS_DIR = ROOT / "tasks"
 
 # Maps phase number → track file (basename only)

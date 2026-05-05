@@ -1,6 +1,6 @@
-# LogSnap AI Agents
+# mzgb AI Agents
 
-Four Ethiopian-named agents coordinate LogSnap implementation via **task files + Matrix chat**.
+Four Ethiopian-named agents coordinate mzgb implementation via **task files + Matrix chat**.
 
 ```
 ┌──────────────┐                              ┌──────────────┐
@@ -32,8 +32,8 @@ Four Ethiopian-named agents coordinate LogSnap implementation via **task files +
 **ብርሃን ለሁሉ** — *"Light for all"* | *Biruk = Blessed*
 
 - **Track:** `tasks/backend.md` | Phases 2–4
-- **Owns:** `logsnap/parser.py`, `logsnap/filters.py`, `stream_lines()`
-- **Posts to:** `#logsnap-integration` → `READY: filter-engine` when done
+- **Owns:** `mzgb/parser.py`, `mzgb/filters.py`, `stream_lines()`
+- **Posts to:** `#mzgb-integration` → `READY: filter-engine` when done
 - **Unblocks:** Liya (Phase 5) and Tigist (Phase 7)
 
 ---
@@ -42,9 +42,9 @@ Four Ethiopian-named agents coordinate LogSnap implementation via **task files +
 **ልያ** — *"Great one"*
 
 - **Track:** `tasks/cli.md` | Phases 1, 5–6
-- **Owns:** `logsnap/cli.py`, `logsnap/renderer.py`
+- **Owns:** `mzgb/cli.py`, `mzgb/renderer.py`
 - **Waits for:** `READY: filter-engine` from Biruk before Phase 5
-- **Posts to:** `#logsnap-integration` → `READY: cli-mvp` when done
+- **Posts to:** `#mzgb-integration` → `READY: cli-mvp` when done
 - **Unblocks:** Tigist (Phase 7)
 
 ---
@@ -53,9 +53,9 @@ Four Ethiopian-named agents coordinate LogSnap implementation via **task files +
 **ትግስት** — *"Patience"*
 
 - **Track:** `tasks/features.md` | Phases 7–9
-- **Owns:** `logsnap/buffer.py`, `logsnap/follow.py`, `logsnap/summary.py`
+- **Owns:** `mzgb/buffer.py`, `mzgb/follow.py`, `mzgb/summary.py`
 - **Waits for:** BOTH `READY: filter-engine` AND `READY: cli-mvp`
-- **Posts to:** `#logsnap-integration` → `READY: context-buffer`, `READY: follow-mode`, `READY: summary-mode`
+- **Posts to:** `#mzgb-integration` → `READY: context-buffer`, `READY: follow-mode`, `READY: summary-mode`
 - **Unblocks:** Natnael (Phase 10)
 
 ---
@@ -67,7 +67,7 @@ Four Ethiopian-named agents coordinate LogSnap implementation via **task files +
 - **Owns:** `pyproject.toml`, `setup.cfg`, `tests/`, `README.md`
 - **Starts immediately** (Phase 1 has no dependencies)
 - **Waits for:** `READY: all-features` from Tigist before Phase 10
-- **Posts:** `SHIP-READY ✓` to `#logsnap-general` when full test suite passes
+- **Posts:** `SHIP-READY ✓` to `#mzgb-general` when full test suite passes
 
 ---
 
@@ -75,19 +75,19 @@ Four Ethiopian-named agents coordinate LogSnap implementation via **task files +
 
 | Room | Purpose |
 |---|---|
-| `#logsnap-general` | All agents online/offline announcements |
-| `#logsnap-backend` | Biruk's work updates + spec questions |
-| `#logsnap-cli` | Liya's work updates |
-| `#logsnap-features` | Tigist's work updates |
-| `#logsnap-infra` | Natnael's work updates |
-| `#logsnap-integration` | Cross-agent READY signals + coordination |
-| `#logsnap-blockers` | Failed tests, design questions, escalations |
+| `#mzgb-general` | All agents online/offline announcements |
+| `#mzgb-backend` | Biruk's work updates + spec questions |
+| `#mzgb-cli` | Liya's work updates |
+| `#mzgb-features` | Tigist's work updates |
+| `#mzgb-infra` | Natnael's work updates |
+| `#mzgb-integration` | Cross-agent READY signals + coordination |
+| `#mzgb-blockers` | Failed tests, design questions, escalations |
 
 ---
 
 ## Signal Protocol
 
-Agents coordinate via structured messages in `#logsnap-integration`:
+Agents coordinate via structured messages in `#mzgb-integration`:
 
 ```
 READY: filter-engine   ← Biruk posts when Phases 2-4 done

@@ -11,16 +11,16 @@
 #   - Labelling PRs by track (backend / cli / features / infra)
 #   - Posting release notes when a phase completes
 #   - Keeping the README and repo description up to date
-#   - Listening on #logsnap-integration for PUSH: and RELEASE: signals
+#   - Listening on #mzgb-integration for PUSH: and RELEASE: signals
 #
-# Signals he listens for (on #logsnap-integration):
+# Signals he listens for (on #mzgb-integration):
 #   PUSH:task_id          — push current branch, open PR for this task
 #   RELEASE:v1.x.x        — tag + create GitHub release with changelog
 #   SYNC                  — force push main to match local
 #
 # Environment variables (from .env):
 #   GITHUB_TOKEN          — personal access token (repo scope)
-#   GITHUB_REPO           — e.g. "yourname/logsnap"
+#   GITHUB_REPO           — e.g. "yourname/mzgb"
 """
 
 import asyncio
@@ -78,7 +78,7 @@ def _gh_repo() -> str:
     if not repo or repo == "your_username/your_repo_name":
         raise EnvironmentError(
             "GITHUB_REPO not set. Add it to .env:\n"
-            "  GITHUB_REPO=yourname/logsnap"
+            "  GITHUB_REPO=yourname/mzgb"
         )
     return repo
 
@@ -99,7 +99,7 @@ def _gh_request(
             "Accept":        "application/vnd.github+json",
             "Content-Type":  "application/json",
             "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent":    "logsnap-abel-agent/1.0",
+            "User-Agent":    "mzgb-abel-agent/1.0",
         },
         method=method,
     )
@@ -233,7 +233,7 @@ def create_release(version: str, changelog_path: Optional[Path] = None) -> str:
 
     release = _gh_request("POST", f"/repos/{repo}/releases", {
         "tag_name":   version,
-        "name":       f"LogSnap {version}",
+        "name":       f"mzgb {version}",
         "body":       notes,
         "draft":      False,
         "prerelease": "alpha" in version or "beta" in version,
@@ -298,7 +298,7 @@ async def handle_signal(matrix: AgentMatrixClient, body: str) -> None:
 
 
 async def listen_loop(matrix: AgentMatrixClient) -> None:
-    """Sync loop — listens for signals on #logsnap-integration."""
+    """Sync loop — listens for signals on #mzgb-integration."""
     import nio
 
     async def _cb(room, event):
@@ -314,7 +314,7 @@ async def listen_loop(matrix: AgentMatrixClient) -> None:
 
     await matrix.send(ROOMS["general"],
         "🐙 Abel (GitHub Manager) | Online\n"
-        "  Watching for PUSH:, RELEASE:, SYNC signals on #logsnap-integration\n"
+        "  Watching for PUSH:, RELEASE:, SYNC signals on #mzgb-integration\n"
         f"  Repo: {os.environ.get('GITHUB_REPO', 'not configured yet')}"
     )
 

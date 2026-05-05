@@ -1,6 +1,6 @@
 ## Context
 
-LogSnap is a greenfield Python CLI tool. There is no existing codebase to migrate from. The constraints are:
+mzgb is a greenfield Python CLI tool. There is no existing codebase to migrate from. The constraints are:
 - Must handle files too large to fit in memory (target: 5 GB+)
 - Must feel fast and responsive to non-expert users
 - Must be installable with a single `pip install` and work on macOS, Linux, and WSL
@@ -91,12 +91,12 @@ The tool is composed of five logical layers: input sourcing → parsing → filt
 
 ---
 
-### 8. Project layout — single package `logsnap/`
+### 8. Project layout — single package `mzgb/`
 
 **Decision**: Structure as a single flat package:
 ```
-logsnap/
-  __main__.py       # python -m logsnap entry point
+mzgb/
+  __main__.py       # python -m mzgb entry point
   cli.py            # click commands and options
   parser.py         # log format detection and parsing
   filters.py        # filter pipeline (level, time, regex)
@@ -121,4 +121,4 @@ setup.py / pyproject.toml
 
 - Should `--summary` support `--json` output for machine-readable stats? (Likely yes — defer to tasks phase.)
 - Should there be a `--max-matches N` flag to cap output and exit early? (Useful for large files — add as a stretch task.)
-- Should `logsnap` support gzip-compressed log files (`.log.gz`)? (Low effort with `gzip.open` — candidate for Phase 3.)
+- Should `mzgb` support gzip-compressed log files (`.log.gz`)? (Low effort with `gzip.open` — candidate for Phase 3.)

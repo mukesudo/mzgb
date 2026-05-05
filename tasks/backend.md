@@ -10,7 +10,7 @@
 - [ ] 2.1 Implement `stream_lines(source)` generator in `cli.py` that accepts a file path or stdin and yields raw text lines one at a time
 - [ ] 2.2 Add error handling for permission denied and binary/non-UTF-8 content (decode with replacement, warn to stderr)
 - [ ] 2.3 Add error for no-input case (no file path and stdin is a TTY): print clear message and exit non-zero
-- [ ] 2.4 Write a manual smoke test: pipe a large file through `logsnap` and confirm memory stays flat
+- [ ] 2.4 Write a manual smoke test: pipe a large file through `mzgb` and confirm memory stays flat
 
 ## Phase 3 — Log Parser
 

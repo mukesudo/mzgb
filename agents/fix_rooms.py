@@ -1,5 +1,5 @@
 """
-fix_rooms.py — One-shot script to make all LogSnap rooms public
+fix_rooms.py — One-shot script to make all mzgb rooms public
 and invite your personal account so you can join from Element.
 
 Usage:
@@ -93,7 +93,7 @@ async def main(your_username: str):
                 await invite_user(session, token, room_id, user_id)
 
     logger.info("\n✅ Done! All rooms are now public.")
-    logger.info("In Element: click '+' → 'Join public room' → search 'logsnap'")
+    logger.info("In Element: click '+' → 'Join public room' → search 'mzgb'")
 
 
 if __name__ == "__main__":

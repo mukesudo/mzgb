@@ -1,21 +1,21 @@
 {
   "version": "1.0",
-  "project": "logsnap",
+  "project": "mzgb",
   "tasks": [
     {
       "id": "1.2",
       "priority": "CRITICAL",
       "phase": 1,
-      "title": "Create logsnap/ package __init__.py and __main__.py",
+      "title": "Create mzgb/ package __init__.py and __main__.py",
       "assignedAgent": "natnael",
       "track": "infra",
       "files": [
-        "logsnap/__init__.py",
-        "logsnap/__main__.py"
+        "mzgb/__init__.py",
+        "mzgb/__main__.py"
       ],
       "status": "DONE",
       "acceptanceCriteria": [
-        "python3 -m logsnap exits without ImportError"
+        "python3 -m mzgb exits without ImportError"
       ]
     },
     {
@@ -26,13 +26,13 @@
       "assignedAgent": "natnael",
       "track": "infra",
       "files": [
-        "logsnap/cli.py",
-        "logsnap/parser.py",
-        "logsnap/filters.py",
-        "logsnap/buffer.py",
-        "logsnap/follow.py",
-        "logsnap/summary.py",
-        "logsnap/renderer.py"
+        "mzgb/cli.py",
+        "mzgb/parser.py",
+        "mzgb/filters.py",
+        "mzgb/buffer.py",
+        "mzgb/follow.py",
+        "mzgb/summary.py",
+        "mzgb/renderer.py"
       ],
       "status": "DONE",
       "acceptanceCriteria": [
@@ -43,15 +43,15 @@
       "id": "1.4",
       "priority": "HIGH",
       "phase": 1,
-      "title": "Verify logsnap --help runs without error",
+      "title": "Verify mzgb --help runs without error",
       "assignedAgent": "natnael",
       "track": "infra",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "DONE",
       "acceptanceCriteria": [
-        "logsnap --help exits 0",
+        "mzgb --help exits 0",
         "Help text contains --level --pattern --follow"
       ],
       "claimedBy": "natnael",
@@ -67,7 +67,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -91,14 +91,14 @@
       "assignedAgent": null,
       "track": "backend",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "DONE",
       "claimedBy": null,
       "claimedAt": null,
       "acceptanceCriteria": [
-        "cat file | logsnap prints lines",
-        "logsnap file.log prints lines"
+        "cat file | mzgb prints lines",
+        "mzgb file.log prints lines"
       ],
       "dependsOn": [
         "2.1"
@@ -113,7 +113,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/parser.py"
+        "mzgb/parser.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -136,7 +136,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/parser.py"
+        "mzgb/parser.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -160,7 +160,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/parser.py"
+        "mzgb/parser.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -184,7 +184,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/parser.py"
+        "mzgb/parser.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -207,7 +207,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/parser.py"
+        "mzgb/parser.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -230,7 +230,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/parser.py"
+        "mzgb/parser.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -253,7 +253,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/filters.py"
+        "mzgb/filters.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -277,7 +277,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/filters.py"
+        "mzgb/filters.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -300,7 +300,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/filters.py"
+        "mzgb/filters.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -323,7 +323,7 @@
       "assignedAgent": "biruk",
       "track": "backend",
       "files": [
-        "logsnap/filters.py"
+        "mzgb/filters.py"
       ],
       "status": "DONE",
       "claimedBy": "biruk",
@@ -348,13 +348,13 @@
       "assignedAgent": "liya",
       "track": "cli",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "DONE",
       "claimedBy": "liya",
       "claimedAt": "2026-05-03T07:58:17.443802+00:00",
       "acceptanceCriteria": [
-        "logsnap --level ERROR file.log shows only ERROR lines"
+        "mzgb --level ERROR file.log shows only ERROR lines"
       ],
       "dependsOn": [
         "4.4",
@@ -371,13 +371,13 @@
       "assignedAgent": "liya",
       "track": "cli",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "DONE",
       "claimedBy": "liya",
       "claimedAt": "2026-05-03T07:58:17.448487+00:00",
       "acceptanceCriteria": [
-        "logsnap --pattern timeout file.log shows matching lines"
+        "mzgb --pattern timeout file.log shows matching lines"
       ],
       "dependsOn": [
         "4.4",
@@ -394,7 +394,7 @@
       "assignedAgent": "liya",
       "track": "cli",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "DONE",
       "claimedBy": "liya",
@@ -417,7 +417,7 @@
       "assignedAgent": "liya",
       "track": "cli",
       "files": [
-        "logsnap/renderer.py"
+        "mzgb/renderer.py"
       ],
       "status": "DONE",
       "claimedBy": "liya",
@@ -440,13 +440,13 @@
       "assignedAgent": "liya",
       "track": "cli",
       "files": [
-        "logsnap/renderer.py"
+        "mzgb/renderer.py"
       ],
       "status": "DONE",
       "claimedBy": "liya",
       "claimedAt": "2026-05-03T07:58:17.462308+00:00",
       "acceptanceCriteria": [
-        "logsnap file.log | cat produces plain text"
+        "mzgb file.log | cat produces plain text"
       ],
       "dependsOn": [
         "6.1"
@@ -462,7 +462,7 @@
       "assignedAgent": "tigist",
       "track": "features",
       "files": [
-        "logsnap/buffer.py"
+        "mzgb/buffer.py"
       ],
       "status": "CLAIMED",
       "claimedBy": "tigist",
@@ -483,7 +483,7 @@
       "assignedAgent": null,
       "track": "features",
       "files": [
-        "logsnap/buffer.py"
+        "mzgb/buffer.py"
       ],
       "status": "OPEN",
       "claimedBy": null,
@@ -503,8 +503,8 @@
       "assignedAgent": null,
       "track": "features",
       "files": [
-        "logsnap/buffer.py",
-        "logsnap/cli.py"
+        "mzgb/buffer.py",
+        "mzgb/cli.py"
       ],
       "status": "OPEN",
       "claimedBy": null,
@@ -526,7 +526,7 @@
       "assignedAgent": "tigist",
       "track": "features",
       "files": [
-        "logsnap/follow.py"
+        "mzgb/follow.py"
       ],
       "status": "CLAIMED",
       "claimedBy": "tigist",
@@ -547,13 +547,13 @@
       "assignedAgent": null,
       "track": "features",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "OPEN",
       "claimedBy": null,
       "claimedAt": null,
       "acceptanceCriteria": [
-        "logsnap --follow file.log tails live lines",
+        "mzgb --follow file.log tails live lines",
         "Ctrl-C exits cleanly"
       ],
       "dependsOn": [
@@ -569,7 +569,7 @@
       "assignedAgent": "tigist",
       "track": "features",
       "files": [
-        "logsnap/summary.py"
+        "mzgb/summary.py"
       ],
       "status": "CLAIMED",
       "claimedBy": "tigist",
@@ -589,8 +589,8 @@
       "assignedAgent": null,
       "track": "features",
       "files": [
-        "logsnap/summary.py",
-        "logsnap/renderer.py"
+        "mzgb/summary.py",
+        "mzgb/renderer.py"
       ],
       "status": "OPEN",
       "claimedBy": null,
@@ -612,7 +612,7 @@
       "assignedAgent": null,
       "track": "features",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "OPEN",
       "claimedBy": null,
@@ -633,13 +633,13 @@
       "assignedAgent": "natnael",
       "track": "infra",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "CLAIMED",
       "claimedBy": "natnael",
       "claimedAt": "2026-05-03T08:20:36.304403+00:00",
       "acceptanceCriteria": [
-        "logsnap file.log.gz works transparently"
+        "mzgb file.log.gz works transparently"
       ],
       "dependsOn": [
         "2.1"
@@ -653,7 +653,7 @@
       "assignedAgent": "test",
       "track": "infra",
       "files": [
-        "logsnap/cli.py"
+        "mzgb/cli.py"
       ],
       "status": "CLAIMED",
       "claimedBy": "test",

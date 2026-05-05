@@ -1,4 +1,4 @@
-# LogSnap PM Dashboard
+# mzgb PM Dashboard
 _Updated: 2026-05-03 09:27 UTC_
 
 ## Progress
@@ -14,6 +14,6 @@ _Updated: 2026-05-03 09:27 UTC_
 - Endalk (Release) — merge sequencer
 
 ## Rooms
-- #logsnap-general — announcements
-- #logsnap-integration — READY/MERGE signals
-- #logsnap-blockers — failures and escalations
+- #mzgb-general — announcements
+- #mzgb-integration — READY/MERGE signals
+- #mzgb-blockers — failures and escalations

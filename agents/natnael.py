@@ -15,11 +15,11 @@
 # Tools Available:
 #   - Read/write: setup.cfg, pyproject.toml, tests/*, README.md
 #   - Test runner: full pytest suite + coverage
-#   - Matrix rooms: #logsnap-infra, #logsnap-integration, #logsnap-general
+#   - Matrix rooms: #mzgb-infra, #mzgb-integration, #mzgb-general
 #
 # Interfaces:
 #   - Starts Phase 1 immediately (no dependencies)
-#   - Listens for READY signals from all agents on #logsnap-integration
+#   - Listens for READY signals from all agents on #mzgb-integration
 #   - Posts "PHASE-10-START" to #general when all features confirmed
 #   - Posts final "SHIP-READY ✓" to #general when Phase 10 passes
 """
@@ -51,7 +51,7 @@ async def run_full_suite() -> tuple[bool, str]:
     """Run the complete test suite with coverage."""
     result = subprocess.run(
         [sys.executable, "-m", "pytest", "tests/", "-q", "--tb=short",
-         "--cov=logsnap", "--cov-report=term-missing:skip-covered"],
+         "--cov=mzgb", "--cov-report=term-missing:skip-covered"],
         capture_output=True, text=True, cwd=ROOT
     )
     return result.returncode == 0, (result.stdout + result.stderr).strip()
@@ -87,7 +87,7 @@ async def work_cycle(matrix: AgentMatrixClient) -> None:
         await matrix.send(
             ROOMS["infra"],
             f"🏗️  [{task.id}] Implementing: {task.description}\n"
-            f"  Files: pyproject.toml | setup.cfg | logsnap/__init__.py\n"
+            f"  Files: pyproject.toml | setup.cfg | mzgb/__init__.py\n"
             f"  Reply DONE:{task.id} to confirm."
         )
 
@@ -151,7 +151,7 @@ async def work_cycle(matrix: AgentMatrixClient) -> None:
     if passed:
         await matrix.send(ROOMS["general"],
             "✅ SHIP-READY ✓ | Natnael — full test suite green, coverage threshold met.\n"
-            "  LogSnap is ready to release! 🎉")
+            "  mzgb is ready to release! 🎉")
     else:
         await matrix.send(ROOMS["blockers"],
             f"🚨 Natnael | Final E2E suite FAILED\n```\n{output[:1200]}\n```")

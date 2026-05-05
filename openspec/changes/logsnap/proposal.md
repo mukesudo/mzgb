@@ -1,18 +1,18 @@
 ## Why
 
-Developers and DevOps engineers routinely face log files that are hundreds of megabytes to several gigabytes in size — far too large to open in an editor or search with a naive `grep` pass. Existing tools like `grep`, `awk`, and `tail` are powerful but low-level: they require composing complex shell pipelines, provide no visual hierarchy, and offer no time-aware filtering. The result is that debugging production incidents becomes an archaeology exercise rather than a focused query. **LogSnap** solves this by wrapping those primitives in a purpose-built, human-friendly CLI that streams large files efficiently while presenting results with color, context, and structure.
+Developers and DevOps engineers routinely face log files that are hundreds of megabytes to several gigabytes in size — far too large to open in an editor or search with a naive `grep` pass. Existing tools like `grep`, `awk`, and `tail` are powerful but low-level: they require composing complex shell pipelines, provide no visual hierarchy, and offer no time-aware filtering. The result is that debugging production incidents becomes an archaeology exercise rather than a focused query. **mzgb** solves this by wrapping those primitives in a purpose-built, human-friendly CLI that streams large files efficiently while presenting results with color, context, and structure.
 
 ## Business Value Analysis
 
 ### Who Benefits and How
 
-- **On-call Engineers / SREs** — During a production incident, every minute counts. Today they pipe `grep | grep | awk` across multi-GB files, losing context and wasting 10–20 minutes just isolating relevant lines. LogSnap gives them a single command with level + time-range + pattern filters that returns focused, colored results in seconds. Direct impact: faster MTTR (Mean Time to Resolve).
+- **On-call Engineers / SREs** — During a production incident, every minute counts. Today they pipe `grep | grep | awk` across multi-GB files, losing context and wasting 10–20 minutes just isolating relevant lines. mzgb gives them a single command with level + time-range + pattern filters that returns focused, colored results in seconds. Direct impact: faster MTTR (Mean Time to Resolve).
 
-- **Backend Developers debugging locally** — They run services locally and scroll through noisy `DEBUG`-level output to find the one `ERROR` that matters. LogSnap lets them filter to errors-only with context lines, without changing their app's log configuration. Direct impact: shorter feedback loops during development.
+- **Backend Developers debugging locally** — They run services locally and scroll through noisy `DEBUG`-level output to find the one `ERROR` that matters. mzgb lets them filter to errors-only with context lines, without changing their app's log configuration. Direct impact: shorter feedback loops during development.
 
-- **DevOps / Platform Engineers** — They maintain CI/CD pipelines and need to inspect build or deploy logs programmatically. LogSnap's `--summary` and pipe-friendly plain-text mode (plus future `--json` output) make it composable in shell scripts and automated checks. Direct impact: scriptable log inspection without custom tooling.
+- **DevOps / Platform Engineers** — They maintain CI/CD pipelines and need to inspect build or deploy logs programmatically. mzgb's `--summary` and pipe-friendly plain-text mode (plus future `--json` output) make it composable in shell scripts and automated checks. Direct impact: scriptable log inspection without custom tooling.
 
-- **Junior Engineers and non-shell-experts** — The target of the "accessible and easy" design principle. They know what they're looking for but don't know how to compose `grep -A 5 -B 5 "ERROR" | awk '...'`. LogSnap's named flags, sensible defaults, and rich `--help` make log investigation approachable without shell expertise. Direct impact: reduces knowledge gap and onboarding friction.
+- **Junior Engineers and non-shell-experts** — The target of the "accessible and easy" design principle. They know what they're looking for but don't know how to compose `grep -A 5 -B 5 "ERROR" | awk '...'`. mzgb's named flags, sensible defaults, and rich `--help` make log investigation approachable without shell expertise. Direct impact: reduces knowledge gap and onboarding friction.
 
 ### The Problem Being Solved
 
@@ -23,7 +23,7 @@ Log files are the primary diagnostic artifact in software systems, but the tooli
 3. **Context loss** — Raw `grep` output strips surrounding lines, making it hard to understand *why* an error occurred.
 4. **No time awareness** — There is no standard tool that says "show me all ERRORs between 14:00 and 14:15."
 
-LogSnap solves all four in a single, self-contained command.
+mzgb solves all four in a single, self-contained command.
 
 ### Priority: **HIGH**
 
@@ -32,7 +32,7 @@ Rated by value delivered, not technical novelty:
 - Log investigation is a **daily activity** for the target personas — not an edge case.
 - The pain is **universal and cross-team** (dev, SRE, DevOps, QA all inspect logs).
 - The solution is **self-contained** — no infrastructure, no backend, no integrations required. High value-to-effort ratio.
-- Alternatives (Splunk, Datadog, ELK) require setup, cost money, and are unavailable in offline/local environments. LogSnap fills a real gap at zero ongoing cost.
+- Alternatives (Splunk, Datadog, ELK) require setup, cost money, and are unavailable in offline/local environments. mzgb fills a real gap at zero ongoing cost.
 
 ### What Happens If We Don't Build This
 
@@ -56,7 +56,7 @@ Rated by value delivered, not technical novelty:
 
 ## What Changes
 
-- **New tool `logsnap`** — a Python CLI installable via `pip install logsnap` or run directly with `python -m logsnap`
+- **New tool `mzgb`** — a Python CLI installable via `pip install mzgb` or run directly with `python -m mzgb`
 - **Stream-based processing** — reads log files line-by-line so memory usage stays constant regardless of file size
 - **Level filtering** — filter output to one or more severity levels (`DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`) across common log formats (plain text, JSON logs, logfmt)
 - **Pattern/regex search** — filter lines matching a keyword or regular expression with highlighted match text
@@ -89,4 +89,4 @@ Rated by value delivered, not technical novelty:
 - **Python version**: Requires Python 3.9+
 - **No external APIs or databases** — fully offline, processes only local files or stdin
 - **Affected systems**: Developer workstations and CI/CD environments where log inspection is needed; no production system changes
-- **Distribution**: Packaged as a standard Python package; entry point registered as `logsnap` console script
+- **Distribution**: Packaged as a standard Python package; entry point registered as `mzgb` console script

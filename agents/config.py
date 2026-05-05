@@ -1,5 +1,5 @@
 """
-Shared configuration for all LogSnap AI agents.
+Shared configuration for all mzgb AI agents.
 Homeserver and room settings live here.
 """
 
@@ -7,13 +7,13 @@ MATRIX_HOMESERVER = "http://localhost:8008"
 
 # Matrix rooms — one per coordination channel
 ROOMS = {
-    "general":     "#logsnap-general:localhost",
-    "backend":     "#logsnap-backend:localhost",
-    "cli":         "#logsnap-cli:localhost",
-    "features":    "#logsnap-features:localhost",
-    "infra":       "#logsnap-infra:localhost",
-    "integration": "#logsnap-integration:localhost",
-    "blockers":    "#logsnap-blockers:localhost",
+    "general":     "#mzgb-general:localhost",
+    "backend":     "#mzgb-backend:localhost",
+    "cli":         "#mzgb-cli:localhost",
+    "features":    "#mzgb-features:localhost",
+    "infra":       "#mzgb-infra:localhost",
+    "integration": "#mzgb-integration:localhost",
+    "blockers":    "#mzgb-blockers:localhost",
 }
 
 # Task file paths (relative to project root)
@@ -33,31 +33,31 @@ TASK_FILES = {
 AGENTS = {
     "biruk": {
         "username": "biruk",
-        "password": "biruk-logsnap-dev",
+        "password": "biruk-mzgb-dev",
         "display_name": "Biruk (Backend)",
         "track": "backend",
     },
     "liya": {
         "username": "liya",
-        "password": "liya-logsnap-dev",
+        "password": "liya-mzgb-dev",
         "display_name": "Liya (CLI & Renderer)",
         "track": "cli",
     },
     "tigist": {
         "username": "tigist",
-        "password": "tigist-logsnap-dev",
+        "password": "tigist-mzgb-dev",
         "display_name": "Tigist (Features)",
         "track": "features",
     },
     "natnael": {
         "username": "natnael",
-        "password": "natnael-logsnap-dev",
+        "password": "natnael-mzgb-dev",
         "display_name": "Natnael (Infra & Testing)",
         "track": "infra",
     },
     "dawit": {
         "username": "endalk",
-        "password": "endalk-logsnap-dev",
+        "password": "endalk-mzgb-dev",
         "display_name": "Dawit (Senior Reviewer)",
         "track": "review",
     },

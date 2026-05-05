@@ -1,5 +1,5 @@
 """
-bootstrap.py — One-time setup for the LogSnap agent Matrix environment.
+bootstrap.py — One-time setup for the mzgb agent Matrix environment.
 
 Run this ONCE after `docker compose up` to:
   1. Register all agent accounts on the Synapse homeserver
@@ -24,7 +24,7 @@ from agents.config import AGENTS, MATRIX_HOMESERVER, ROOMS
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 logger = logging.getLogger("bootstrap")
 
-REGISTRATION_SECRET = "logsnap-dev-secret-change-in-prod"
+REGISTRATION_SECRET = "mzgb-dev-secret-change-in-prod"
 
 
 async def register_agent(session: aiohttp.ClientSession, username: str, password: str) -> bool:
@@ -86,8 +86,8 @@ async def create_room(session: aiohttp.ClientSession, token: str, alias: str) ->
     headers = {"Authorization": f"Bearer {token}"}
     payload = {
         "room_alias_name": local_alias,
-        "name": f"LogSnap {local_alias.replace('logsnap-', '').title()}",
-        "topic": f"LogSnap agent coordination — {local_alias}",
+        "name": f"mzgb {local_alias.replace('mzgb-', '').title()}",
+        "topic": f"mzgb agent coordination — {local_alias}",
         "preset": "public_chat",
         "visibility": "public",
     }
@@ -143,7 +143,7 @@ async def send_welcome(session: aiohttp.ClientSession, token: str, room_id: str,
 
 
 async def main():
-    logger.info("=== LogSnap Agent Bootstrap ===")
+    logger.info("=== mzgb Agent Bootstrap ===")
     logger.info("Homeserver: %s", MATRIX_HOMESERVER)
 
     async with aiohttp.ClientSession() as session:
@@ -179,7 +179,7 @@ async def main():
         general_id = room_ids.get("general", "")
         if general_id:
             await send_welcome(session, token, general_id,
-                "🎉 LogSnap agent environment is ready!\n\n"
+                "🎉 mzgb agent environment is ready!\n\n"
                 "Agents:\n"
                 "  • Biruk  (Backend)   — parser, filters, streaming\n"
                 "  • Liya   (CLI)       — Click wiring, renderer\n"

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# LogSnap MVP Demo Script
-# This script demonstrates the core functionality of LogSnap
+# mzgb MVP Demo Script
+# This script demonstrates the core functionality of mzgb
 
-echo "🚀 LogSnap MVP Demo"
+echo "🚀 mzgb MVP Demo"
 echo "=================="
 echo
 
@@ -28,31 +28,31 @@ echo
 # Demo 1: Basic filtering by log level
 echo "🔍 Demo 1: Filter by ERROR level"
 echo "--------------------------------"
-python3 -m logsnap --level ERROR sample_app.log
+python3 -m mzgb --level ERROR sample_app.log
 echo
 
 # Demo 2: Pattern matching
 echo "🔍 Demo 2: Search for 'connection' pattern"
 echo "-----------------------------------------"
-python3 -m logsnap --pattern "connection" sample_app.log
+python3 -m mzgb --pattern "connection" sample_app.log
 echo
 
 # Demo 3: Context around matches
 echo "🔍 Demo 3: Find ERROR with 2 lines context"
 echo "----------------------------------------"
-python3 -m logsnap --level ERROR --context 2 sample_app.log
+python3 -m mzgb --level ERROR --context 2 sample_app.log
 echo
 
 # Demo 4: Summary statistics
 echo "📊 Demo 4: Log summary statistics"
 echo "-------------------------------"
-python3 -m logsnap --summary sample_app.log
+python3 -m mzgb --summary sample_app.log
 echo
 
 # Demo 5: Multiple filters
 echo "🔍 Demo 5: Multiple filters (ERROR or WARN)"
 echo "-----------------------------------------"
-python3 -m logsnap --level ERROR --level WARN sample_app.log
+python3 -m mzgb --level ERROR --level WARN sample_app.log
 echo
 
 # Clean up
@@ -61,7 +61,7 @@ rm sample_app.log
 echo "✅ Demo complete!"
 echo
 
-echo "🎯 LogSnap MVP Features Demonstrated:"
+echo "🎯 mzgb MVP Features Demonstrated:"
 echo "  ✓ Log level filtering"
 echo "  ✓ Pattern matching"
 echo "  ✓ Context awareness"
@@ -75,4 +75,4 @@ echo "  Run 'sh start_agents.sh start' to launch AI-powered agents"
 echo "  Agents can automatically implement features using LLMs"
 echo
 
-echo "📚 More info: https://github.com/mukesudo/logsnap"
+echo "📚 More info: https://github.com/mukesudo/mzgb"
