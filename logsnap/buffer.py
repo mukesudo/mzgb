@@ -22,9 +22,7 @@ def context_window(
     buf: deque = deque(maxlen=context)
     after_remaining = 0
     last_yielded_idx = -1
-    items = list(stream)
-
-    for idx, (_, parsed) in enumerate(items):
+    for idx, (_, parsed) in enumerate(stream):
         if pipeline.match(parsed):
             gap_start = idx - len(buf)
             if context > 0 and last_yielded_idx >= 0 and gap_start > last_yielded_idx + 1:

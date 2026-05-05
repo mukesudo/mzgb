@@ -1,6 +1,8 @@
+"""Summary mode — collect and display log statistics with live progress."""
 import sys
 import time
 from collections import Counter
+from datetime import datetime
 from typing import Iterable, Optional
 
 from rich.console import Console
@@ -118,6 +120,15 @@ def summarize_with_progress(lines: Iterable[LogLine]) -> dict:
     last_update = 0.0
     frame_idx = 0
 
+    def _track_ts(ts: Optional[datetime], first: Optional[datetime], last: Optional[datetime]) -> tuple:
+        if ts is None:
+            return first, last
+        if first is None or ts < first:
+            first = ts
+        if last is None or ts > last:
+            last = ts
+        return first, last
+
     with Live(
         _progress_panel(_SPINNER_FRAMES[0], 0, by_level, 0.0),
         console=console,
@@ -130,11 +141,7 @@ def summarize_with_progress(lines: Iterable[LogLine]) -> dict:
                 by_level[line.level] += 1
             else:
                 unparsed += 1
-            if line.timestamp:
-                if first_ts is None or line.timestamp < first_ts:
-                    first_ts = line.timestamp
-                if last_ts is None or line.timestamp > last_ts:
-                    last_ts = line.timestamp
+            first_ts, last_ts = _track_ts(line.timestamp, first_ts, last_ts)
 
             now = time.monotonic()
             if now - last_update >= _LIVE_REFRESH_INTERVAL_SECONDS:

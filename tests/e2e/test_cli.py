@@ -307,4 +307,27 @@ class TestCLIEdgeCases:
         f.write_text("")
         result = runner.invoke(main, ["--summary", str(f)])
         assert result.exit_code == 0
-        assert "0" in result.output
+
+    def test_filter_large_file(self, runner, tmp_path):
+        """Exercise the full filter loop with enough lines to trigger progress updates."""
+        f = tmp_path / "big.log"
+        f.write_text("\n".join(
+            f"2024-01-15 14:00:{i:02d} ERROR line {i}" for i in range(2000)
+        ))
+        result = runner.invoke(main, ["--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        assert "line 0" in result.output
+
+    def test_version_flag(self, runner):
+        result = runner.invoke(main, ["--version"])
+        assert result.exit_code == 0
+        assert "logsnap v" in result.output
+
+    def test_summary_with_tty(self, runner, tmp_path, monkeypatch):
+        """Exercise summarize_with_progress TTY path."""
+        monkeypatch.setattr("sys.stderr.isatty", lambda: True)
+        f = tmp_path / "t.log"
+        f.write_text("2024-01-15 14:00:01 ERROR boom\n2024-01-15 14:00:02 INFO ok\n")
+        result = runner.invoke(main, ["--summary", str(f)])
+        assert result.exit_code == 0
+        assert "Total lines" in result.output

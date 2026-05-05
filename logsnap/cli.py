@@ -1,6 +1,7 @@
 """CLI entry point for logsnap — log filtering by level, pattern, and time range."""
 import gzip
 import sys
+import time
 from datetime import datetime
 from typing import Any, Generator, Iterator, List, Optional, Tuple
 
@@ -91,6 +92,14 @@ def _help_callback(ctx: click.Context, _param: Any, value: bool) -> None:
     ctx.exit()
 
 
+def _version_callback(ctx: click.Context, _param: Any, value: bool) -> None:
+    """Eager callback that prints the version and exits."""
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(f"logsnap v{__version__}")
+    ctx.exit()
+
+
 def _parse_time_range(
     from_dt: Optional[str],
     to_dt: Optional[str],
@@ -152,10 +161,35 @@ def _run_filter(
     fmt: str,
 ) -> None:
     """Stream lines through the filter pipeline and print matches."""
-    for raw in lines:
-        parsed = parse_line(raw, fmt)
-        if pipeline.match(parsed):
-            renderer.print_match(parsed)
+    use_live = sys.stderr.isatty()
+    started = time.monotonic()
+    scanned = 0
+    matched = 0
+    live = None
+    if use_live:
+        from rich.live import Live
+        live = Live("", console=_console, refresh_per_second=15, transient=True)
+        live.start()
+    try:
+        for raw in lines:
+            scanned += 1
+            parsed = parse_line(raw, fmt)
+            if pipeline.match(parsed):
+                matched += 1
+                renderer.print_match(parsed)
+            if use_live and live and scanned % 1000 == 0:
+                elapsed = time.monotonic() - started
+                rate = int(scanned / elapsed) if elapsed > 0 else 0
+                live.update(
+                    f"⠋ scanning {scanned:,} lines ({rate:,}/s)  ✓ {matched:,} matches"
+                )
+    finally:
+        if live:
+            live.stop()
+    elapsed = time.monotonic() - started
+    rate = int(scanned / elapsed) if elapsed > 0 else 0
+    if use_live:
+        _console.print(f"✓ scanned {scanned:,} lines in {elapsed:.2f}s ({rate:,}/s)  matched {matched:,}")
 
 
 def _run_context(
@@ -182,6 +216,8 @@ def _run_context(
 @click.argument("file", type=click.Path(exists=True), required=False)
 @click.option("--help", "-h", is_flag=True, is_eager=True, expose_value=False,
               callback=_help_callback, help="Show this message and exit.")
+@click.option("--version", "-V", is_flag=True, is_eager=True, expose_value=False,
+              callback=_version_callback, help="Show the version and exit.")
 @click.option("--level", "-l", multiple=True, help="Filter by log level (e.g. ERROR, WARN). Repeatable.")
 @click.option("--pattern", "-p", default=None, help="Filter by keyword or regex pattern.")
 @click.option("--from", "from_dt", default=None, help="Start of time range (e.g. '2024-01-15 14:00:00').")
