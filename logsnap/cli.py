@@ -5,9 +5,12 @@ from typing import Generator, List, Optional
 
 import click
 
+from logsnap.buffer import context_window
 from logsnap.filters import FilterPipeline, LevelFilter, PatternFilter, TimeRangeFilter
+from logsnap.follow import follow_file
 from logsnap.parser import detect_format, parse_line
 from logsnap.renderer import Renderer
+from logsnap.summary import print_summary, summarize
 
 
 def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
@@ -80,7 +83,19 @@ def main(file, level, pattern, from_dt, to_dt, context, follow, summary):
     pipeline = FilterPipeline(filters)
     renderer = Renderer(pattern=pattern)
 
-    # Stream and detect format
+    # Follow mode — stream new lines as they arrive (file only)
+    if follow:
+        if file is None:
+            raise click.UsageError("--follow requires a FILE argument.")
+        raw_stream = follow_file(file)
+        fmt = "plaintext"
+        for raw in raw_stream:
+            parsed = parse_line(raw, fmt)
+            if pipeline.match(parsed):
+                renderer.print_match(parsed)
+        return
+
+    # Normal mode — read file or stdin
     lines_buf: List[str] = []
     raw_stream = stream_lines(file)
 
@@ -98,6 +113,23 @@ def main(file, level, pattern, from_dt, to_dt, context, follow, summary):
         for raw in raw_stream:
             yield raw
 
+    # Summary mode
+    if summary:
+        parsed_lines = (parse_line(raw, fmt) for raw in process_all())
+        print_summary(summarize(parsed_lines))
+        return
+
+    # Context mode
+    if context > 0:
+        pairs = ((raw, parse_line(raw, fmt)) for raw in process_all())
+        for line, is_sep in context_window(pairs, pipeline, context):
+            if is_sep:
+                renderer.print_separator()
+            else:
+                renderer.print_match(line)
+        return
+
+    # Default: stream and filter
     for raw in process_all():
         parsed = parse_line(raw, fmt)
         if pipeline.match(parsed):
