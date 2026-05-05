@@ -49,7 +49,8 @@ def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
     """Yield lines one at a time from a file path or stdin.
 
     Args:
-        path: File path, '-' for stdin, or None for stdin.
+        path: File path to read. Pass '-' to read from stdin.
+              Pass an empty value to default to stdin.
               Transparently handles .gz files.
 
     Yields:
@@ -145,6 +146,22 @@ def _run_filter(
             renderer.print_match(parsed)
 
 
+def _run_context(
+    pipeline: FilterPipeline,
+    renderer: Renderer,
+    lines: Iterator[str],
+    fmt: str,
+    ctx_size: int,
+) -> None:
+    """Stream lines through context-window mode and print with separators."""
+    pairs = ((raw, parse_line(raw, fmt)) for raw in lines)
+    for line, is_sep in context_window(pairs, pipeline, ctx_size):
+        if is_sep:
+            renderer.print_separator()
+        else:
+            renderer.print_match(line)
+
+
 @click.command(
     context_settings=dict(max_content_width=100),
     add_help_option=False,
@@ -207,12 +224,7 @@ def main(ctx: click.Context, file: Optional[str], level: tuple, pattern: Optiona
 
     # Context mode
     if context > 0:
-        pairs = ((raw, parse_line(raw, fmt)) for raw in process_all())
-        for line, is_sep in context_window(pairs, pipeline, context):
-            if is_sep:
-                renderer.print_separator()
-            else:
-                renderer.print_match(line)
+        _run_context(pipeline, renderer, process_all(), fmt, context)
         return
 
     # Default: stream and filter
