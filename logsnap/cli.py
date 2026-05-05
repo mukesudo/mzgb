@@ -4,13 +4,44 @@ from datetime import datetime
 from typing import Generator, List, Optional
 
 import click
+from rich.console import Console
+from rich.text import Text
 
+from logsnap import __version__
 from logsnap.buffer import context_window
 from logsnap.filters import FilterPipeline, LevelFilter, PatternFilter, TimeRangeFilter
 from logsnap.follow import follow_file
 from logsnap.parser import detect_format, parse_line
 from logsnap.renderer import Renderer
 from logsnap.summary import print_summary, summarize
+
+_console = Console(stderr=True, highlight=False)
+
+
+def _print_banner() -> None:
+    """Print the full logsnap banner (used in help context)."""
+    c = Console(stderr=True, highlight=False, force_terminal=True)
+    c.print()
+    t = Text()
+    t.append("⚡ ", style="bold yellow")
+    t.append("log", style="bold white")
+    t.append("snap", style="bold cyan")
+    t.append(f"  v{__version__}", style="dim")
+    t.append("  ·  MIT  ·  Python 3.9+", style="dim")
+    c.print(t)
+    c.print("  Fast log filtering by level, pattern, and time range.", style="dim")
+    c.print()
+
+
+def _print_status(msg: str) -> None:
+    """Print a one-line status hint to stderr (only on a TTY)."""
+    if _console.is_terminal:
+        status = Text()
+        status.append("⚡ ", style="bold yellow")
+        status.append("logsnap ", style="bold cyan")
+        status.append(f"v{__version__}  ", style="dim")
+        status.append(msg, style="dim")
+        _console.print(status)
 
 
 def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
@@ -34,8 +65,22 @@ def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
             yield line.rstrip("\n")
 
 
-@click.command()
+def _help_callback(ctx, _param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    _print_banner()
+    click.echo(ctx.get_help())
+    ctx.exit()
+
+
+@click.command(
+    context_settings=dict(max_content_width=100),
+    add_help_option=False,
+)
+@click.pass_context
 @click.argument("file", type=click.Path(exists=True), required=False)
+@click.option("--help", "-h", is_flag=True, is_eager=True, expose_value=False,
+              callback=_help_callback, help="Show this message and exit.")
 @click.option("--level", "-l", multiple=True, help="Filter by log level (e.g. ERROR, WARN). Repeatable.")
 @click.option("--pattern", "-p", default=None, help="Filter by keyword or regex pattern.")
 @click.option("--from", "from_dt", default=None, help="Start of time range (e.g. '2024-01-15 14:00:00').")
@@ -43,7 +88,7 @@ def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
 @click.option("--context", "-C", default=0, type=int, help="Show N lines before and after each match.")
 @click.option("--follow", "-f", is_flag=True, help="Follow file for new lines (like tail -f).")
 @click.option("--summary", "-s", is_flag=True, help="Show summary table instead of raw lines.")
-def main(file, level, pattern, from_dt, to_dt, context, follow, summary):
+def main(ctx, file, level, pattern, from_dt, to_dt, context, follow, summary):
     """LogSnap — smart filter for very large log files.
 
     \b
@@ -55,6 +100,8 @@ def main(file, level, pattern, from_dt, to_dt, context, follow, summary):
       logsnap --follow --level ERROR app.log
       cat app.log | logsnap --pattern "connection refused"
     """
+    _print_status(f"reading {file!r}" if file else "reading from stdin")
+
     if file is None and not click.get_text_stream("stdin").readable():
         raise click.UsageError("Provide a FILE argument or pipe input via stdin.")
 
