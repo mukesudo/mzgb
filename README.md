@@ -13,7 +13,24 @@ Filter by log level, regex pattern, or time range. Works with plaintext, JSON, a
 ## Install
 
 ```bash
+# pip
 pip install mzgb
+
+# pipx (isolated, recommended)
+pipx install mzgb
+
+# Homebrew (macOS)
+brew tap mukesudo/mzgb && brew install mzgb
+
+# Scoop (Windows)
+scoop bucket add mzgb https://github.com/mukesudo/scoop-mzgb
+scoop install mzgb
+
+# Snap (Linux)
+snap install mzgb --classic
+
+# Nix
+nix run github:mukesudo/mzgb
 ```
 
 Or from source:
