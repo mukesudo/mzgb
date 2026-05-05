@@ -186,6 +186,20 @@
     footer a { color: #7a849e; }
     footer a:hover { color: #fff; text-decoration: none; }
 
+    /* BADGES */
+    .badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; font-weight: 600;
+      padding: 0.2rem 0.6rem; border-radius: 4px;
+      letter-spacing: 0.02em;
+    }
+    .badge-tests  { background: #1a2a1a; color: #39d353; border: 1px solid #2a4a2a; }
+    .badge-cov    { background: #1a2a1a; color: #4af0d0; border: 1px solid #1e3a3a; }
+    .badge-ver    { background: #1a1f30; color: #7a90d0; border: 1px solid #1e2a40; }
+    .badge-mit    { background: #1a1a1a; color: #7a849e; border: 1px solid #2a2a2a; }
+
     @media (max-width: 560px) {
       h1 { font-size: 1.6rem; }
       .blocks { grid-template-columns: 1fr; }
@@ -208,7 +222,12 @@
 <main>
 
   <section class="hero">
-    <div class="tag">v0.1.0 &middot; MIT &middot; Python 3.9+</div>
+    <div class="badges">
+      <span class="badge badge-tests">&#10003; 99 tests</span>
+      <span class="badge badge-cov">91% coverage</span>
+      <span class="badge badge-ver">v0.1.0</span>
+      <span class="badge badge-mit">MIT</span>
+    </div>
     <h1>logsnap</h1>
     <p class="sub">A CLI tool for filtering large log files by level, pattern, and time range. Streams line by line — no memory issues with large files.</p>
     <div class="actions">
