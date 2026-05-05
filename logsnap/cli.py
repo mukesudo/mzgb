@@ -60,7 +60,10 @@ def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
             yield line.rstrip("\n")
         return
 
-    open_fn = gzip.open if path.endswith(".gz") else open
+    if path.endswith(".gz"):
+        open_fn = gzip.open
+    else:
+        open_fn = open
     with open_fn(path, "rt", encoding="utf-8", errors="replace") as fh:
         for line in fh:
             yield line.rstrip("\n")
@@ -121,6 +124,27 @@ def _peek_and_detect(raw_stream: Iterator[str]) -> Tuple[List[str], str]:
     return lines_buf, detect_format(lines_buf)
 
 
+def _run_follow(file: str, pipeline: FilterPipeline, renderer: Renderer) -> None:
+    """Stream new lines from a file as they arrive (tail -f mode)."""
+    for raw in follow_file(file):
+        parsed = parse_line(raw, "plaintext")
+        if pipeline.match(parsed):
+            renderer.print_match(parsed)
+
+
+def _run_filter(
+    pipeline: FilterPipeline,
+    renderer: Renderer,
+    lines: Iterator[str],
+    fmt: str,
+) -> None:
+    """Stream lines through the filter pipeline and print matches."""
+    for raw in lines:
+        parsed = parse_line(raw, fmt)
+        if pipeline.match(parsed):
+            renderer.print_match(parsed)
+
+
 @click.command(
     context_settings=dict(max_content_width=100),
     add_help_option=False,
@@ -136,7 +160,9 @@ def _peek_and_detect(raw_stream: Iterator[str]) -> Tuple[List[str], str]:
 @click.option("--context", "-C", default=0, type=int, help="Show N lines before and after each match.")
 @click.option("--follow", "-f", is_flag=True, help="Follow file for new lines (like tail -f).")
 @click.option("--summary", "-s", is_flag=True, help="Show summary table instead of raw lines.")
-def main(ctx, file, level, pattern, from_dt, to_dt, context, follow, summary):
+def main(ctx: click.Context, file: Optional[str], level: tuple, pattern: Optional[str],  # noqa: PLR0913
+         from_dt: Optional[str], to_dt: Optional[str], context: int,
+         follow: bool, summary: bool) -> None:
     """LogSnap — smart filter for very large log files.
 
     \b
@@ -161,12 +187,7 @@ def main(ctx, file, level, pattern, from_dt, to_dt, context, follow, summary):
     if follow:
         if file is None:
             raise click.UsageError("--follow requires a FILE argument.")
-        raw_stream = follow_file(file)
-        fmt = "plaintext"
-        for raw in raw_stream:
-            parsed = parse_line(raw, fmt)
-            if pipeline.match(parsed):
-                renderer.print_match(parsed)
+        _run_follow(file, pipeline, renderer)
         return
 
     # Normal mode — read file or stdin
@@ -195,7 +216,4 @@ def main(ctx, file, level, pattern, from_dt, to_dt, context, follow, summary):
         return
 
     # Default: stream and filter
-    for raw in process_all():
-        parsed = parse_line(raw, fmt)
-        if pipeline.match(parsed):
-            renderer.print_match(parsed)
+    _run_filter(pipeline, renderer, process_all(), fmt)
