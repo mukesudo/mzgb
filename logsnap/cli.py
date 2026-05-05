@@ -14,7 +14,7 @@ from logsnap.filters import FilterPipeline, LevelFilter, PatternFilter, TimeRang
 from logsnap.follow import follow_file
 from logsnap.parser import detect_format, parse_line
 from logsnap.renderer import Renderer
-from logsnap.summary import print_summary, summarize
+from logsnap.summary import print_summary, summarize_with_progress
 
 _console = Console(stderr=True, highlight=False)
 
@@ -23,6 +23,18 @@ def _print_banner() -> None:
     """Print the full logsnap banner (used in help context)."""
     c = Console(stderr=True, highlight=False, force_terminal=True)
     c.print()
+    c.print("""
+ ████                                                          
+▒▒███                                                          
+ ▒███   ██████   ███████  █████  ████████    ██████   ████████ 
+ ▒███  ███▒▒███ ███▒▒███ ███▒▒  ▒▒███▒▒███  ▒▒▒▒▒███ ▒▒███▒▒███
+ ▒███ ▒███ ▒███▒███ ▒███▒▒█████  ▒███ ▒███   ███████  ▒███ ▒███
+ ▒███ ▒███ ▒███▒███ ▒███ ▒▒▒▒███ ▒███ ▒███  ███▒▒███  ▒███ ▒███
+ █████▒▒██████ ▒▒███████ ██████  ████ █████▒▒████████ ▒███████ 
+▒▒▒▒▒  ▒▒▒▒▒▒   ▒▒▒▒▒███▒▒▒▒▒▒  ▒▒▒▒ ▒▒▒▒▒  ▒▒▒▒▒▒▒▒  ▒███▒▒▒  
+                ███ ▒███                              ▒███     
+               ▒▒██████                               █████    
+                ▒▒▒▒▒▒                               ▒▒▒▒▒     """)
     t = Text()
     t.append("⚡ ", style="bold yellow")
     t.append("log", style="bold white")
@@ -219,7 +231,7 @@ def main(ctx: click.Context, file: Optional[str], level: tuple, pattern: Optiona
     # Summary mode
     if summary:
         parsed_lines = (parse_line(raw, fmt) for raw in process_all())
-        print_summary(summarize(parsed_lines))
+        print_summary(summarize_with_progress(parsed_lines))
         return
 
     # Context mode
