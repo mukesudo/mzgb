@@ -7,9 +7,27 @@ include = ["mzgb*"]
 
 [project]
 name = "mzgb"
-version = "0.1.0"
-description = "Smart CLI for filtering and navigating very large log files"
+version = "0.1.1"
+description = "Fast CLI for filtering very large log files by level, pattern, and time range"
+readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Logging",
+    "Topic :: Utilities",
+]
+keywords = ["log", "filter", "cli", "grep", "logging", "devops", "tail"]
 dependencies = [
     "click>=8.1.0",
     "rich>=13.0.0",

@@ -1,12 +1,14 @@
 # mzgb
 
-[![Tests](https://img.shields.io/badge/tests-44%20passing-39d353?style=flat-square)](https://github.com/mukesudo/mzgb)
-[![Coverage](https://img.shields.io/badge/coverage-85%25-39d353?style=flat-square)](https://github.com/mukesudo/mzgb)
+[![Tests](https://img.shields.io/badge/tests-99%20passing-39d353?style=flat-square)](https://github.com/mukesudo/mzgb)
+[![Coverage](https://img.shields.io/badge/coverage-91%25-39d353?style=flat-square)](https://github.com/mukesudo/mzgb)
+[![PyPI](https://img.shields.io/badge/pypi-v0.1.0-4af0d0?style=flat-square)](https://pypi.org/project/mzgb)
 [![Python](https://img.shields.io/badge/python-3.9+-4af0d0?style=flat-square)](https://pypi.org/project/mzgb)
 [![License](https://img.shields.io/badge/license-MIT-white?style=flat-square)](LICENSE)
-[![Landing page](https://img.shields.io/badge/website-mzgb.netlify.app-4af0d0?style=flat-square)](https://mzgb.netlify.app)
 
-A CLI tool for filtering large log files by level, pattern, and time range. Streams line by line — works on files of any size.
+**mzgb** (mezgeb — *"record"* in Amharic) is a fast CLI tool for filtering and navigating very large log files. Streams line by line — no memory issues, no matter the file size.
+
+Filter by log level, regex pattern, or time range. Works with plaintext, JSON, and logfmt logs. Pipes cleanly with `kubectl`, `journalctl`, `cat`, and friends.
 
 ## Install
 
