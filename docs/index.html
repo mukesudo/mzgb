@@ -223,13 +223,13 @@
 
   <section class="hero">
     <div class="badges">
-      <span class="badge badge-tests">&#10003; 99 tests</span>
+      <span class="badge badge-tests">&#10003; 118 tests</span>
       <span class="badge badge-cov">91% coverage</span>
-      <span class="badge badge-ver">v0.1.0</span>
+      <span class="badge badge-ver">v0.2.0</span>
       <span class="badge badge-mit">MIT</span>
     </div>
     <h1>mzgb</h1>
-    <p class="sub">A CLI tool for filtering large log files by level, pattern, and time range. Streams line by line — no memory issues with large files.</p>
+    <p class="sub">Filter large log files by level, pattern, and time range. Invert matches, output JSON/CSV, scan multiple files at once. Streams line by line — no memory issues with files of any size.</p>
     <div class="actions">
       <a href="#install" class="btn">Get started</a>
       <a href="https://github.com/mukesudo/mzgb" target="_blank" class="btn-ghost">View source</a>
@@ -282,6 +282,36 @@
       </div>
 
       <div class="block">
+        <div class="block-title">Invert match</div>
+        <div class="block-body">
+<span class="dim">$</span> mzgb <span class="flag">--invert</span> <span class="flag">--level</span> <span class="arg">DEBUG</span> app.log
+
+<span class="ok">[INFO]  14:00:01  Server started</span>
+<span class="warn">[WARN]  14:00:05  High memory: 85%</span>
+<span class="err">[ERROR] 14:00:09  DB query failed</span>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-title">JSON output — pipe into jq</div>
+        <div class="block-body">
+<span class="dim">$</span> mzgb <span class="flag">--output</span> <span class="arg">json</span> <span class="flag">--level</span> <span class="arg">ERROR</span> app.log | jq <span class="arg">'.msg'</span>
+
+<span class="ok">"DB query failed"</span>
+<span class="ok">"Connection timeout"</span>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-title">Multiple files &amp; globs</div>
+        <div class="block-body">
+<span class="dim">$</span> mzgb <span class="flag">--level</span> <span class="arg">ERROR</span> service-a.log service-b.log
+<span class="dim">$</span> mzgb <span class="flag">--level</span> <span class="arg">ERROR</span> /var/log/*.log
+<span class="dim">$</span> mzgb <span class="flag">--output</span> <span class="arg">csv</span> *.log &gt; report.csv
+        </div>
+      </div>
+
+      <div class="block">
         <div class="block-title">Works with pipes</div>
         <div class="block-body">
 <span class="dim">$</span> kubectl logs pod/api | mzgb <span class="flag">--level</span> <span class="arg">ERROR</span>
@@ -299,6 +329,10 @@
         <tr><td><code>--pattern</code></td><td>Filter by keyword or regex.</td></tr>
         <tr><td><code>--from / --to</code></td><td>Time range filter.</td></tr>
         <tr><td><code>-C / --context</code></td><td>Show N lines before and after each match.</td></tr>
+        <tr><td><code>--invert / -v</code></td><td>Print lines that do <strong>not</strong> match.</td></tr>
+        <tr><td><code>--line-numbers / -n</code></td><td>Prefix output with source line number.</td></tr>
+        <tr><td><code>--no-color</code></td><td>Disable ANSI color output.</td></tr>
+        <tr><td><code>--output / -o</code></td><td>Output format: <code>text</code> (default), <code>json</code>, <code>csv</code>.</td></tr>
         <tr><td><code>--summary</code></td><td>Print a summary table instead of raw lines.</td></tr>
         <tr><td><code>--follow</code></td><td>Follow file for new lines (like tail -f).</td></tr>
       </table>
@@ -372,14 +406,17 @@
     <a href="https://github.com/mukesudo/homebrew-mzgb" target="_blank">Homebrew</a> &middot;
     <a href="https://github.com/mukesudo/scoop-mzgb" target="_blank">Scoop</a>
   </p>
-  <p class="dim" style="margin-top:0.5rem">v0.1.1 &middot; MIT License &middot; by Mukhtar Saeed</p>
+  <p class="dim" style="margin-top:0.5rem">v0.2.0 &middot; MIT License &middot; by Mukhtar Saeed</p>
 </footer>
 
 <script>
   const commands = [
     'mzgb --level ERROR app.log',
-    'mzgb --pattern "timeout" -C 2 app.log',
+    'mzgb --invert --level DEBUG app.log',
+    'mzgb --output json --level ERROR app.log | jq .msg',
+    'mzgb -n --pattern "timeout" -C 2 app.log',
     'cat server.log | mzgb --summary',
+    'mzgb --level ERROR /var/log/*.log',
   ];
   let ci = 0, ci2 = 0;
   const el = document.getElementById('typed');
