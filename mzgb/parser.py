@@ -66,7 +66,8 @@ def parse_json_line(line: str) -> LogLine:
     )
     ts = normalize_timestamp(str(raw_ts)) if raw_ts else None
 
-    msg = obj.get("msg") or obj.get("message") or obj.get("MESSAGE") or ""
+    msg_raw = obj.get("msg") or obj.get("message") or obj.get("MESSAGE")
+    msg = str(msg_raw) if msg_raw is not None else ""
 
     skip = {"level", "severity", "lvl", "LEVEL",
             "time", "timestamp", "ts", "@timestamp",
@@ -112,7 +113,8 @@ def parse_logfmt_line(line: str) -> LogLine:
         level = level.upper()
     raw_ts = pairs.get("time") or pairs.get("ts") or pairs.get("timestamp")
     ts = normalize_timestamp(raw_ts) if raw_ts else None
-    msg = pairs.get("msg") or pairs.get("message") or ""
+    msg_raw = pairs.get("msg") or pairs.get("message")
+    msg = msg_raw if msg_raw is not None else ""
     skip = {"level", "lvl", "severity", "time", "ts", "timestamp", "msg", "message"}
     extras = {k: v for k, v in pairs.items() if k not in skip}
     return LogLine(raw=line, level=level, timestamp=ts, message=msg, extras=extras)
