@@ -8,6 +8,7 @@ def context_window(
     stream: Iterable[Tuple[str, LogLine]],
     pipeline,
     context: int,
+    invert: bool = False,
 ) -> Generator[Tuple[LogLine, bool], None, None]:
     """Yield (LogLine, is_separator) pairs respecting before/after context.
 
@@ -23,7 +24,7 @@ def context_window(
     after_remaining = 0
     last_yielded_idx = -1
     for idx, (_, parsed) in enumerate(stream):
-        if pipeline.match(parsed):
+        if pipeline.match(parsed) != invert:
             gap_start = idx - len(buf)
             if context > 0 and last_yielded_idx >= 0 and gap_start > last_yielded_idx + 1:
                 yield (None, True)

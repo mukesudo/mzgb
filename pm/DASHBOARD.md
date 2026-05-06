@@ -25,27 +25,37 @@ _Updated: 2026-05-06 11:00 UTC_
 
 ---
 
-## 📋 Next: v0.2 — Quick Wins
+## � v0.2 — SHIPPED (2026-05-06)
 
-**0/12 tasks started** — OpenSpec: `openspec/changes/mzgb-v02/`
+**8/8 quick-win tasks DONE — 118 tests passing**
+
+| Feature | Status |
+|---|---|
+| `--invert` / `-v` (grep parity) | ✅ |
+| `--line-numbers` / `-n` | ✅ |
+| `--no-color` flag | ✅ |
+| Multi-file + glob support | ✅ |
+| Filename prefix in multi-file output | ✅ |
+| `--output json` (NDJSON) | ✅ |
+| `--output csv` (with header) | ✅ |
+| `.bz2` transparent decompression | ✅ |
+
+---
+
+## � Next: v0.3 — Algorithms
+
+**0/10 tasks started** — OpenSpec: `openspec/changes/mzgb-v02/`
 
 ### Backlog (priority order)
 | Task | Effort | Agent |
 |---|---|---|
-| `--invert` / `-v` flag | small | Liya |
-| `--line-numbers` / `-n` flag | small | Liya |
-| `--no-color` flag | small | Liya |
-| Multi-file + glob support | small | Biruk |
-| `.bz2` compressed input | small | Biruk |
-| `--output json/csv` | medium | Biruk + Liya |
-| Unit tests for all above | medium | Natnael |
-
-### Then v0.3 (algorithms)
-- Aho-Corasick multi-pattern matcher
-- Boyer-Moore literal search
-- Bloom filter pre-screen
-- Drain template parser for smarter `--summary`
-- Benchmark suite vs grep/ripgrep → `BENCHMARKS.md`
+| `mzgb/matchers.py` factory | medium | Biruk |
+| Aho-Corasick multi-pattern engine | medium | Biruk |
+| Boyer-Moore literal search fast path | small | Biruk |
+| Bloom filter pre-screen | medium | Biruk |
+| Drain template parser for `--summary` | medium | Tigist |
+| Benchmark suite vs grep/ripgrep | medium | Natnael |
+| `BENCHMARKS.md` results table | small | Natnael |
 
 ### Then v0.4 (intelligence — the moat)
 - `--dedupe`, spike detection, timeline chart

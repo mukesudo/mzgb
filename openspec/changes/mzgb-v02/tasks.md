@@ -2,17 +2,17 @@
 
 ### UX
 
-- [ ] 2.1.1 Add `--invert` / `-v` boolean flag to `cli.py`; wrap filter predicate: `not matches(line) if invert else matches(line)`
-- [ ] 2.1.2 Add `--line-numbers` / `-n` flag; track counter in stream loop; render as dim right-aligned prefix `  42 │`
-- [ ] 2.1.3 Add `--no-color` flag; pass to `rich.Console(no_color=True)` to override TTY auto-detect
+- [x] 2.1.1 Add `--invert` / `-v` boolean flag to `cli.py`; wrap filter predicate: `not matches(line) if invert else matches(line)`
+- [x] 2.1.2 Add `--line-numbers` / `-n` flag; track counter in stream loop; render as dim right-aligned prefix `  42 │`
+- [x] 2.1.3 Add `--no-color` flag; pass to `rich.Console(no_color=True)` to override TTY auto-detect
 
 ### Input / Output
 
-- [ ] 2.2.1 Replace single `file` argument with `files` (multiple via `nargs=-1`); wire through `fileinput.input(files)`
-- [ ] 2.2.2 Prefix output lines with dim filename when more than one file is provided; add `--filename / -H` to force/suppress
-- [ ] 2.2.3 Add `--output [text|json|csv]` option; `json` emits NDJSON `{"ts","level","msg","file","lineno"}`; `csv` uses `csv.writer`
-- [ ] 2.2.4 Add `.bz2` transparent decompression alongside existing `.gz` in file open path
-- [ ] 2.2.5 Write unit tests for multi-file, `--output json`, `--invert`, `--line-numbers`
+- [x] 2.2.1 Replace single `file` argument with `files` (multiple via `nargs=-1`); wire through `fileinput.input(files)`
+- [x] 2.2.2 Prefix output lines with dim filename when more than one file is provided; add `--filename / -H` to force/suppress
+- [x] 2.2.3 Add `--output [text|json|csv]` option; `json` emits NDJSON `{"ts","level","msg","file","lineno"}`; `csv` uses `csv.writer`
+- [x] 2.2.4 Add `.bz2` transparent decompression alongside existing `.gz` in file open path
+- [x] 2.2.5 Write unit tests for multi-file, `--output json`, `--invert`, `--line-numbers`
 
 ## v0.3 — Algorithms
 

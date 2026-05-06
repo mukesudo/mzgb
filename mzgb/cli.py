@@ -1,5 +1,8 @@
 """CLI entry point for mzgb — log filtering by level, pattern, and time range."""
+import bz2
+import glob as glob_module
 import gzip
+import os
 import sys
 import time
 from datetime import datetime
@@ -75,11 +78,30 @@ def stream_lines(path: Optional[str]) -> Generator[str, None, None]:
 
     if path.endswith(".gz"):
         open_fn = gzip.open
+    elif path.endswith(".bz2"):
+        open_fn = bz2.open
     else:
         open_fn = open
     with open_fn(path, "rt", encoding="utf-8", errors="replace") as fh:
         for line in fh:
             yield line.rstrip("\n")
+
+
+def stream_files(files: tuple) -> Generator[Tuple[str, int, str], None, None]:
+    """Yield (filename, lineno, raw) for each line across all files.
+
+    Falls back to stdin when files is empty. Expands glob patterns on all platforms.
+
+    Yields:
+        (filename, 1-based line number, raw line text)
+    """
+    if not files:
+        for lineno, line in enumerate(sys.stdin, 1):
+            yield ("-", lineno, line.rstrip("\n"))
+        return
+    for fname in files:
+        for lineno, raw in enumerate(stream_lines(fname), 1):
+            yield (fname, lineno, raw)
 
 
 def _help_callback(ctx: click.Context, _param: Any, value: bool) -> None:
@@ -135,14 +157,15 @@ def _build_pipeline(
     return FilterPipeline(filters)
 
 
-def _peek_and_detect(raw_stream: Iterator[str]) -> Tuple[List[str], str]:
-    """Peek first 20 lines and detect log format."""
-    lines_buf: List[str] = []
-    for raw in raw_stream:
-        lines_buf.append(raw)
-        if len(lines_buf) >= 20:
+def _peek_and_detect(stream) -> Tuple[List[Tuple], str]:
+    """Peek first 20 items from (fname, lineno, raw) stream and detect log format."""
+    buf: List[Tuple] = []
+    for item in stream:
+        buf.append(item)
+        if len(buf) >= 20:
             break
-    return lines_buf, detect_format(lines_buf)
+    raws = [item[2] for item in buf]
+    return buf, detect_format(raws)
 
 
 def _run_follow(file: str, pipeline: FilterPipeline, renderer: Renderer) -> None:
@@ -153,13 +176,27 @@ def _run_follow(file: str, pipeline: FilterPipeline, renderer: Renderer) -> None
             renderer.print_match(parsed)
 
 
+def _emit(renderer: Renderer, parsed, output: str, lineno: Optional[int], filename: Optional[str]) -> None:
+    """Emit a single matched line in the requested output format."""
+    if output == "json":
+        renderer.print_json(parsed, lineno, filename)
+    elif output == "csv":
+        renderer.print_csv_row(parsed, lineno, filename)
+    else:
+        renderer.print_match(parsed, lineno, filename)
+
+
 def _run_filter(
     pipeline: FilterPipeline,
     renderer: Renderer,
-    lines: Iterator[str],
+    stream,
     fmt: str,
+    invert: bool = False,
+    output: str = "text",
+    show_filename: bool = False,
+    show_lineno: bool = False,
 ) -> None:
-    """Stream lines through the filter pipeline and print matches."""
+    """Stream (fname, lineno, raw) triples through the filter pipeline and print matches."""
     use_live = sys.stderr.isatty()
     started = time.monotonic()
     scanned = 0
@@ -170,12 +207,19 @@ def _run_filter(
         live = Live("", console=_console, refresh_per_second=15, transient=True)
         live.start()
     try:
-        for raw in lines:
+        for fname, lineno, raw in stream:
             scanned += 1
             parsed = parse_line(raw, fmt)
-            if pipeline.match(parsed):
+            is_match = pipeline.match(parsed)
+            if invert:
+                is_match = not is_match
+            if is_match:
                 matched += 1
-                renderer.print_match(parsed)
+                _emit(
+                    renderer, parsed, output,
+                    lineno if show_lineno else None,
+                    fname if show_filename else None,
+                )
             if use_live and live and scanned % 1000 == 0:
                 elapsed = time.monotonic() - started
                 rate = int(scanned / elapsed) if elapsed > 0 else 0
@@ -194,17 +238,20 @@ def _run_filter(
 def _run_context(
     pipeline: FilterPipeline,
     renderer: Renderer,
-    lines: Iterator[str],
+    stream,
     fmt: str,
     ctx_size: int,
+    invert: bool = False,
+    output: str = "text",
 ) -> None:
     """Stream lines through context-window mode and print with separators."""
-    pairs = ((raw, parse_line(raw, fmt)) for raw in lines)
-    for line, is_sep in context_window(pairs, pipeline, ctx_size):
+    raw_iter = (raw for _, _, raw in stream)
+    pairs = ((raw, parse_line(raw, fmt)) for raw in raw_iter)
+    for line, is_sep in context_window(pairs, pipeline, ctx_size, invert=invert):
         if is_sep:
             renderer.print_separator()
-        else:
-            renderer.print_match(line)
+        elif line is not None:
+            _emit(renderer, line, output, None, None)
 
 
 @click.command(
@@ -212,7 +259,7 @@ def _run_context(
     add_help_option=False,
 )
 @click.pass_context
-@click.argument("file", type=click.Path(exists=True), required=False)
+@click.argument("files", nargs=-1, type=click.Path())
 @click.option("--help", "-h", is_flag=True, is_eager=True, expose_value=False,
               callback=_help_callback, help="Show this message and exit.")
 @click.option("--version", "-V", is_flag=True, is_eager=True, expose_value=False,
@@ -224,9 +271,27 @@ def _run_context(
 @click.option("--context", "-C", default=0, type=int, help="Show N lines before and after each match.")
 @click.option("--follow", "-f", is_flag=True, help="Follow file for new lines (like tail -f).")
 @click.option("--summary", "-s", is_flag=True, help="Show summary table instead of raw lines.")
-def main(ctx: click.Context, file: Optional[str], level: tuple, pattern: Optional[str],  # noqa: PLR0913
-         from_dt: Optional[str], to_dt: Optional[str], context: int,
-         follow: bool, summary: bool) -> None:
+@click.option("--invert", "-v", is_flag=True, help="Print lines that do NOT match.")
+@click.option("--line-numbers", "-n", is_flag=True, help="Show source line numbers.")
+@click.option("--no-color", is_flag=True, help="Disable colored output.")
+@click.option("--output", "-o", default="text",
+              type=click.Choice(["text", "json", "csv"], case_sensitive=False),
+              help="Output format: text (default), json (NDJSON), or csv.")
+def main(  # noqa: PLR0913
+    ctx: click.Context,
+    files: tuple,
+    level: tuple,
+    pattern: Optional[str],
+    from_dt: Optional[str],
+    to_dt: Optional[str],
+    context: int,
+    follow: bool,
+    summary: bool,
+    invert: bool,
+    line_numbers: bool,
+    no_color: bool,
+    output: str,
+) -> None:
     """mzgb — smart filter for very large log files.
 
     \b
@@ -237,42 +302,64 @@ def main(ctx: click.Context, file: Optional[str], level: tuple, pattern: Optiona
       mzgb --summary app.log
       mzgb --follow --level ERROR app.log
       cat app.log | mzgb --pattern "connection refused"
+      mzgb --invert --level DEBUG app.log
+      mzgb --output json --level ERROR *.log
     """
-    _print_status(f"reading {file!r}" if file else "reading from stdin")
+    # Expand globs and validate file existence
+    all_files: List[str] = []
+    for pat in files:
+        matches = glob_module.glob(pat)
+        all_files.extend(sorted(matches) if matches else [pat])
 
-    if file is None and not click.get_text_stream("stdin").readable():
+    for f in all_files:
+        if not os.path.exists(f):
+            raise click.UsageError(f"Path does not exist: {f!r}")
+
+    _print_status(f"reading {all_files[0]!r}" if all_files else "reading from stdin")
+
+    if not all_files and sys.stdin.isatty():
         raise click.UsageError("Provide a FILE argument or pipe input via stdin.")
 
     from_dt_parsed, to_dt_parsed = _parse_time_range(from_dt, to_dt)
     pipeline = _build_pipeline(level, pattern, from_dt_parsed, to_dt_parsed)
-    renderer = Renderer(pattern=pattern)
+    show_filename = len(all_files) > 1
+    renderer = Renderer(
+        pattern=pattern,
+        no_color=no_color,
+        show_filename=show_filename,
+        show_lineno=line_numbers,
+    )
 
-    # Follow mode — stream new lines as they arrive (file only)
+    # Follow mode — single file only
     if follow:
-        if file is None:
-            raise click.UsageError("--follow requires a FILE argument.")
-        _run_follow(file, pipeline, renderer)
+        if len(all_files) != 1:
+            raise click.UsageError("--follow requires exactly one FILE argument.")
+        _run_follow(all_files[0], pipeline, renderer)
         return
 
-    # Normal mode — read file or stdin
-    raw_stream = stream_lines(file)
-    lines_buf, fmt = _peek_and_detect(raw_stream)
+    # Build combined stream
+    file_stream = stream_files(tuple(all_files))
+    peeked_buf, fmt = _peek_and_detect(file_stream)
 
-    def process_all() -> Generator[str, None, None]:
-        """Yield buffered lines then remaining stream."""
-        yield from lines_buf
-        yield from raw_stream
+    def process_all() -> Generator[Tuple[str, int, str], None, None]:
+        """Yield peeked lines then remaining stream."""
+        yield from peeked_buf
+        yield from file_stream
 
     # Summary mode
     if summary:
-        parsed_lines = (parse_line(raw, fmt) for raw in process_all())
+        parsed_lines = (parse_line(raw, fmt) for _, _, raw in process_all())
         print_summary(summarize_with_progress(parsed_lines))
         return
 
     # Context mode
     if context > 0:
-        _run_context(pipeline, renderer, process_all(), fmt, context)
+        _run_context(pipeline, renderer, process_all(), fmt, context, invert=invert, output=output)
         return
 
     # Default: stream and filter
-    _run_filter(pipeline, renderer, process_all(), fmt)
+    _run_filter(
+        pipeline, renderer, process_all(), fmt,
+        invert=invert, output=output,
+        show_filename=show_filename, show_lineno=line_numbers,
+    )

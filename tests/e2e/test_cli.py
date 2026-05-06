@@ -331,3 +331,181 @@ class TestCLIEdgeCases:
         result = runner.invoke(main, ["--summary", str(f)])
         assert result.exit_code == 0
         assert "Total lines" in result.output
+
+
+# ── v0.2 — invert ──────────────────────────────────────────────────────────────
+
+class TestCLIInvert:
+    def test_invert_excludes_matched_level(self, runner, plaintext_log):
+        result = runner.invoke(main, ["--invert", "--level", "ERROR", str(plaintext_log)])
+        assert result.exit_code == 0
+        assert "ERROR" not in result.output
+
+    def test_invert_includes_non_matching(self, runner, plaintext_log):
+        result = runner.invoke(main, ["--invert", "--level", "ERROR", str(plaintext_log)])
+        assert result.exit_code == 0
+        lines = [l for l in result.output.splitlines() if l.strip()]
+        assert len(lines) > 0
+
+    def test_invert_pattern(self, runner, tmp_path):
+        f = tmp_path / "t.log"
+        f.write_text("2024-01-15 14:00:01 INFO  ok\n2024-01-15 14:00:02 ERROR boom\n")
+        result = runner.invoke(main, ["--invert", "--pattern", "boom", str(f)])
+        assert result.exit_code == 0
+        assert "ok" in result.output
+        assert "boom" not in result.output
+
+    def test_invert_context(self, runner, tmp_path):
+        f = tmp_path / "t.log"
+        f.write_text("INFO a\nERROR x\nINFO b\n")
+        result = runner.invoke(main, ["--invert", "--level", "ERROR", "--context", "1", str(f)])
+        assert result.exit_code == 0
+        assert "INFO a" in result.output
+        assert "INFO b" in result.output
+
+
+# ── v0.2 — line numbers ────────────────────────────────────────────────────────
+
+class TestCLILineNumbers:
+    def test_line_numbers_present(self, runner, tmp_path):
+        f = tmp_path / "t.log"
+        f.write_text("INFO a\nERROR boom\nINFO c\n")
+        result = runner.invoke(main, ["--line-numbers", "--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        assert "2" in result.output
+
+    def test_line_numbers_not_shown_without_flag(self, runner, tmp_path):
+        f = tmp_path / "t.log"
+        f.write_text("INFO a\nERROR boom\n")
+        result = runner.invoke(main, ["--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        assert ":boom" not in result.output
+
+    def test_short_flag_n(self, runner, tmp_path):
+        f = tmp_path / "t.log"
+        f.write_text("ERROR one\nERROR two\n")
+        result = runner.invoke(main, ["-n", "--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        assert "1" in result.output and "2" in result.output
+
+
+# ── v0.2 — no-color ────────────────────────────────────────────────────────────
+
+class TestCLINoColor:
+    def test_no_color_suppresses_ansi(self, runner, tmp_path):
+        f = tmp_path / "t.log"
+        f.write_text("ERROR boom\n")
+        result = runner.invoke(main, ["--no-color", "--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        assert "\033[" not in result.output
+
+    def test_no_color_output_still_correct(self, runner, tmp_path):
+        f = tmp_path / "t.log"
+        f.write_text("2024-01-15 14:00:01 ERROR boom\n2024-01-15 14:00:02 INFO ok\n")
+        result = runner.invoke(main, ["--no-color", "--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        assert "boom" in result.output
+        assert "ok" not in result.output
+
+
+# ── v0.2 — multi-file ─────────────────────────────────────────────────────────
+
+class TestCLIMultiFile:
+    def test_two_files_combined(self, runner, tmp_path):
+        f1 = tmp_path / "a.log"
+        f2 = tmp_path / "b.log"
+        f1.write_text("ERROR from-a\n")
+        f2.write_text("ERROR from-b\n")
+        result = runner.invoke(main, ["--level", "ERROR", str(f1), str(f2)])
+        assert result.exit_code == 0
+        assert "from-a" in result.output
+        assert "from-b" in result.output
+
+    def test_multi_file_shows_filename_prefix(self, runner, tmp_path):
+        f1 = tmp_path / "a.log"
+        f2 = tmp_path / "b.log"
+        f1.write_text("ERROR x\n")
+        f2.write_text("ERROR y\n")
+        result = runner.invoke(main, ["--level", "ERROR", str(f1), str(f2)])
+        assert result.exit_code == 0
+        assert "a.log" in result.output
+        assert "b.log" in result.output
+
+    def test_nonexistent_file_in_list_exits_nonzero(self, runner, tmp_path):
+        f = tmp_path / "real.log"
+        f.write_text("INFO ok\n")
+        result = runner.invoke(main, [str(f), "/tmp/no_such_file_xyz.log"])
+        assert result.exit_code != 0
+
+
+# ── v0.2 — bz2 support ────────────────────────────────────────────────────────
+
+class TestCLIBz2:
+    def test_bz2_stream_lines(self, tmp_path):
+        import bz2
+        from mzgb.cli import stream_lines
+        f = tmp_path / "test.log.bz2"
+        with bz2.open(f, "wt") as fh:
+            fh.write("INFO compressed\nERROR kaboom\n")
+        assert list(stream_lines(str(f))) == ["INFO compressed", "ERROR kaboom"]
+
+    def test_bz2_level_filter(self, runner, tmp_path):
+        import bz2
+        f = tmp_path / "app.log.bz2"
+        with bz2.open(f, "wt") as fh:
+            fh.write("2024-01-15 14:00:01 INFO  ok\n2024-01-15 14:00:02 ERROR boom\n")
+        result = runner.invoke(main, ["--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        assert "ERROR" in result.output
+        assert "INFO" not in result.output
+
+
+# ── v0.2 — output format ──────────────────────────────────────────────────────
+
+class TestCLIOutputFormat:
+    def test_output_json_valid(self, runner, tmp_path):
+        import json
+        f = tmp_path / "t.log"
+        f.write_text("2024-01-15 14:00:01 ERROR boom\n")
+        result = runner.invoke(main, ["--output", "json", "--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        obj = json.loads(result.output.strip())
+        assert obj["level"] == "ERROR"
+        assert "boom" in obj["msg"]
+
+    def test_output_json_has_keys(self, runner, tmp_path):
+        import json
+        f = tmp_path / "t.log"
+        f.write_text("2024-01-15 14:00:01 ERROR boom\n")
+        result = runner.invoke(main, ["--output", "json", str(f)])
+        assert result.exit_code == 0
+        obj = json.loads(result.output.splitlines()[0])
+        for key in ("ts", "level", "msg", "file", "lineno"):
+            assert key in obj
+
+    def test_output_csv_has_header(self, runner, tmp_path):
+        f = tmp_path / "t.log"
+        f.write_text("2024-01-15 14:00:01 ERROR boom\n")
+        result = runner.invoke(main, ["--output", "csv", "--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        lines = result.output.strip().splitlines()
+        assert lines[0] == "ts,level,msg,file,lineno"
+
+    def test_output_csv_data_row(self, runner, tmp_path):
+        f = tmp_path / "t.log"
+        f.write_text("2024-01-15 14:00:01 ERROR boom\n")
+        result = runner.invoke(main, ["--output", "csv", "--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        lines = result.output.strip().splitlines()
+        assert len(lines) == 2
+        assert "ERROR" in lines[1]
+
+    def test_output_json_multi_line(self, runner, tmp_path):
+        import json
+        f = tmp_path / "t.log"
+        f.write_text("ERROR line1\nERROR line2\nINFO skip\n")
+        result = runner.invoke(main, ["--output", "json", "--level", "ERROR", str(f)])
+        assert result.exit_code == 0
+        rows = [json.loads(l) for l in result.output.strip().splitlines()]
+        assert len(rows) == 2
+        assert all(r["level"] == "ERROR" for r in rows)
