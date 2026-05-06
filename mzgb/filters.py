@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 from typing import List, Optional
 
+from mzgb.matchers import build_matcher
 from mzgb.parser import LogLine
 
 
@@ -18,16 +19,16 @@ class LevelFilter:
 
 
 class PatternFilter:
-    """Match a LogLine by a regex pattern or plain keyword."""
+    """Match a LogLine using the fastest available engine for the pattern."""
 
-    def __init__(self, pattern: str):
+    def __init__(self, pattern: str, regex_mode: bool = False):
         try:
-            self._re = re.compile(pattern, re.IGNORECASE)
-        except re.error as e:
-            raise ValueError(f"Invalid regex pattern {pattern!r}: {e}") from e
+            self._matcher = build_matcher([pattern], regex_mode=regex_mode)
+        except (re.error, ValueError) as e:
+            raise ValueError(f"Invalid pattern {pattern!r}: {e}") from e
 
     def match(self, line: LogLine) -> bool:
-        return bool(self._re.search(line.raw))
+        return self._matcher.match(line.raw)
 
 
 class TimeRangeFilter:

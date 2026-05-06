@@ -13,6 +13,8 @@ class LogLine:
     timestamp: Optional[datetime] = None
     message: Optional[str] = None
     extras: Dict[str, Any] = field(default_factory=dict)
+    cluster_id: int = -1
+    template: Optional[str] = None
 
 
 _TS_FORMATS = [
@@ -170,3 +172,15 @@ def parse_line(line: str, fmt: str) -> LogLine:
     if fmt == "logfmt":
         return parse_logfmt_line(line)
     return parse_plaintext_line(line)
+
+
+def cluster_line(log: LogLine) -> LogLine:
+    """Enrich a LogLine with drain3 cluster_id and template (in-place mutation).
+
+    Uses the message field if available, otherwise falls back to raw.
+    No-op when drain3 is not installed (cluster_id stays -1).
+    """
+    from mzgb.drain import cluster
+    text = log.message if log.message else log.raw
+    log.cluster_id, log.template = cluster(text)
+    return log

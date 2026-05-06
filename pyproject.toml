@@ -42,6 +42,18 @@ dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
 ]
+fast = [
+    "pyahocorasick>=2.0.0",
+    "pybloom-live>=4.0.0",
+]
+drain = [
+    "drain3>=0.9.11",
+]
+all = [
+    "pyahocorasick>=2.0.0",
+    "pybloom-live>=4.0.0",
+    "drain3>=0.9.11",
+]
 
 [project.urls]
 Homepage = "https://github.com/mukesudo/mzgb"

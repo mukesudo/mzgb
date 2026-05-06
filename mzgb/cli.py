@@ -145,13 +145,17 @@ def _build_pipeline(
     pattern: Optional[str],
     from_dt_parsed: Optional[datetime],
     to_dt_parsed: Optional[datetime],
+    bench: bool = False,
 ) -> FilterPipeline:
     """Build a FilterPipeline from CLI option values."""
     filters: list = []
     if level:
         filters.append(LevelFilter(list(level)))
     if pattern:
-        filters.append(PatternFilter(pattern))
+        pf = PatternFilter(pattern)
+        if bench:
+            _console.print(f"[dim]bench  matcher engine : {pf._matcher.engine}[/dim]", markup=True)
+        filters.append(pf)
     if from_dt_parsed or to_dt_parsed:
         filters.append(TimeRangeFilter(from_dt_parsed, to_dt_parsed))
     return FilterPipeline(filters)
@@ -195,10 +199,13 @@ def _run_filter(
     output: str = "text",
     show_filename: bool = False,
     show_lineno: bool = False,
+    bench: bool = False,
 ) -> None:
     """Stream (fname, lineno, raw) triples through the filter pipeline and print matches."""
     use_live = sys.stderr.isatty()
     started = time.monotonic()
+    t_parse = 0.0
+    t_match = 0.0
     scanned = 0
     matched = 0
     live = None
@@ -209,8 +216,16 @@ def _run_filter(
     try:
         for fname, lineno, raw in stream:
             scanned += 1
-            parsed = parse_line(raw, fmt)
-            is_match = pipeline.match(parsed)
+            if bench:
+                t0 = time.perf_counter()
+                parsed = parse_line(raw, fmt)
+                t_parse += time.perf_counter() - t0
+                t1 = time.perf_counter()
+                is_match = pipeline.match(parsed)
+                t_match += time.perf_counter() - t1
+            else:
+                parsed = parse_line(raw, fmt)
+                is_match = pipeline.match(parsed)
             if invert:
                 is_match = not is_match
             if is_match:
@@ -233,6 +248,11 @@ def _run_filter(
     rate = int(scanned / elapsed) if elapsed > 0 else 0
     if use_live:
         _console.print(f"✓ scanned {scanned:,} lines in {elapsed:.2f}s ({rate:,}/s)  matched {matched:,}")
+    if bench:
+        _console.print(f"[dim]bench  total    : {elapsed*1000:.1f} ms[/dim]", markup=True)
+        _console.print(f"[dim]bench  parse    : {t_parse*1000:.1f} ms[/dim]", markup=True)
+        _console.print(f"[dim]bench  match    : {t_match*1000:.1f} ms[/dim]", markup=True)
+        _console.print(f"[dim]bench  lines/s  : {rate:,}[/dim]", markup=True)
 
 
 def _run_context(
@@ -277,6 +297,7 @@ def _run_context(
 @click.option("--output", "-o", default="text",
               type=click.Choice(["text", "json", "csv"], case_sensitive=False),
               help="Output format: text (default), json (NDJSON), or csv.")
+@click.option("--bench", is_flag=True, hidden=True, help="Emit per-stage timing stats to stderr.")
 def main(  # noqa: PLR0913
     ctx: click.Context,
     files: tuple,
@@ -291,6 +312,7 @@ def main(  # noqa: PLR0913
     line_numbers: bool,
     no_color: bool,
     output: str,
+    bench: bool,
 ) -> None:
     """mzgb — smart filter for very large log files.
 
@@ -321,7 +343,7 @@ def main(  # noqa: PLR0913
         raise click.UsageError("Provide a FILE argument or pipe input via stdin.")
 
     from_dt_parsed, to_dt_parsed = _parse_time_range(from_dt, to_dt)
-    pipeline = _build_pipeline(level, pattern, from_dt_parsed, to_dt_parsed)
+    pipeline = _build_pipeline(level, pattern, from_dt_parsed, to_dt_parsed, bench=bench)
     show_filename = len(all_files) > 1
     renderer = Renderer(
         pattern=pattern,
@@ -362,4 +384,5 @@ def main(  # noqa: PLR0913
         pipeline, renderer, process_all(), fmt,
         invert=invert, output=output,
         show_filename=show_filename, show_lineno=line_numbers,
+        bench=bench,
     )
