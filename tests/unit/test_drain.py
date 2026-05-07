@@ -4,6 +4,8 @@ from __future__ import annotations
 import sys
 from unittest.mock import MagicMock
 
+import pytest
+
 import mzgb.drain as drain_module
 from mzgb.parser import LogLine, cluster_line
 
@@ -25,20 +27,20 @@ class TestClusterFallback:
         """Reset drain state before each test."""
         _reset_drain()
 
-    def test_returns_minus_one_when_unavailable(self, monkeypatch) -> None:
+    def test_returns_minus_one_when_unavailable(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """cluster() returns -1 cluster_id when drain3 is absent."""
         monkeypatch.setitem(sys.modules, "drain3", None)
         cluster_id, template = drain_module.cluster("connection refused")
         assert cluster_id == -1
 
-    def test_returns_raw_message_as_template_when_unavailable(self, monkeypatch) -> None:
+    def test_returns_raw_message_as_template_when_unavailable(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """cluster() returns the raw message as template when drain3 is absent."""
         monkeypatch.setitem(sys.modules, "drain3", None)
         msg = "disk full on /dev/sda"
         _, template = drain_module.cluster(msg)
         assert template == msg
 
-    def test_is_available_false_when_unavailable(self, monkeypatch) -> None:
+    def test_is_available_false_when_unavailable(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """is_available() returns False when drain3 cannot be imported."""
         monkeypatch.setitem(sys.modules, "drain3", None)
         _reset_drain()
@@ -115,7 +117,7 @@ class TestClusterWithMockedDrain3:
 class TestClusterLine:
     """Tests for the cluster_line() helper in mzgb.parser."""
 
-    def test_uses_message_when_present(self, monkeypatch) -> None:
+    def test_uses_message_when_present(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """cluster_line() feeds LogLine.message into drain.cluster()."""
         monkeypatch.setattr("mzgb.drain.cluster", lambda text: (42, "tmpl: <*>"))
         log = LogLine(raw="raw line", message="structured message")
@@ -123,7 +125,7 @@ class TestClusterLine:
         assert result.cluster_id == 42
         assert result.template == "tmpl: <*>"
 
-    def test_falls_back_to_raw_when_no_message(self, monkeypatch) -> None:
+    def test_falls_back_to_raw_when_no_message(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """cluster_line() uses LogLine.raw when message is None."""
         monkeypatch.setattr("mzgb.drain.cluster", lambda text: (1, text))
         log = LogLine(raw="fallback raw", message=None)
@@ -131,7 +133,7 @@ class TestClusterLine:
         assert result.cluster_id == 1
         assert result.template == "fallback raw"
 
-    def test_returns_same_logline_object(self, monkeypatch) -> None:
+    def test_returns_same_logline_object(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """cluster_line() mutates and returns the same LogLine instance."""
         monkeypatch.setattr("mzgb.drain.cluster", lambda text: (0, "t"))
         log = LogLine(raw="x")
