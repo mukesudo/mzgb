@@ -1,31 +1,32 @@
 # mzgb PM Dashboard
-_Updated: 2026-05-06 11:00 UTC_
+_Updated: 2026-05-10 00:30 UTC_
 
 ---
 
-## 🚀 v0.1.1 — SHIPPED
+## 🚀 v0.3 — SHIPPED (2026-05-10)
 
-**All 31 v0.1 tasks: DONE (100%)**
+**7/7 algorithm tasks DONE — 156 tests passing**
 
-### What shipped
-| Item | Status |
+| Feature | Status |
 |---|---|
-| Core CLI (`--level`, `--pattern`, `--from`, `--to`, `-C`, `--follow`, `--summary`) | ✅ |
-| 99 passing tests · 91% coverage | ✅ |
-| PyPI — `pip install mzgb` | ✅ |
-| pipx — `pipx install mzgb` | ✅ |
-| Homebrew tap — `brew tap mukesudo/mzgb` | ✅ |
-| Scoop bucket — `scoop bucket add mzgb ...` | ✅ |
-| Snap — `snap/snapcraft.yaml` ready (pending snapcraft upload) | ✅ |
-| Nix flake — `nix run github:mukesudo/mzgb` | ✅ |
-| GitHub Actions OIDC publish workflow | ✅ |
-| Landing page — mzgb.netlify.app | ✅ |
-| GitHub release v0.1.0 + v0.1.1 with dist assets | ✅ |
-| `asciinema` + `agg` installed — demo recording ready | ✅ |
+| `mzgb/matchers.py` factory — `build_matcher(patterns, regex_mode)` | ✅ |
+| Multi-pattern `--pattern` (repeatable, OR logic) | ✅ |
+| Boyer-Moore literal fast path (`str.find`) | ✅ |
+| Aho-Corasick multi-pattern engine (`mzgb[fast]`) | ✅ |
+| Bloom filter pre-screen (`mzgb[fast]`) | ✅ |
+| Drain3 template clustering in `--summary` (`mzgb[drain]`) | ✅ |
+| Benchmark suite vs grep/ripgrep with real results | ✅ |
+
+**Shipped:**
+- `pip install "mzgb[fast]"` — Aho-Corasick + Bloom
+- `pip install "mzgb[drain]"` — Drain3 clustering
+- `pip install "mzgb[all]"` — everything
+- BENCHMARKS.md with honest performance analysis
+- Hidden `--bench` flag for per-stage timing
 
 ---
 
-## � v0.2 — SHIPPED (2026-05-06)
+## ✅ v0.2 — SHIPPED (2026-05-06)
 
 **8/8 quick-win tasks DONE — 118 tests passing**
 
@@ -42,25 +43,27 @@ _Updated: 2026-05-06 11:00 UTC_
 
 ---
 
-## � Next: v0.3 — Algorithms
+## ✅ v0.1.1 — SHIPPED (2026-05-05)
 
-**0/10 tasks started** — OpenSpec: `openspec/changes/mzgb-v02/`
+**All 31 v0.1 tasks: DONE (100%)**
 
-### Backlog (priority order)
-| Task | Effort | Agent |
-|---|---|---|
-| `mzgb/matchers.py` factory | medium | Biruk |
-| Aho-Corasick multi-pattern engine | medium | Biruk |
-| Boyer-Moore literal search fast path | small | Biruk |
-| Bloom filter pre-screen | medium | Biruk |
-| Drain template parser for `--summary` | medium | Tigist |
-| Benchmark suite vs grep/ripgrep | medium | Natnael |
-| `BENCHMARKS.md` results table | small | Natnael |
+| Item | Status |
+|---|---|
+| Core CLI (`--level`, `--pattern`, `--from`, `--to`, `-C`, `--follow`, `--summary`) | ✅ |
+| 99 passing tests · 91% coverage | ✅ |
+| PyPI / pipx / Homebrew / Scoop / Snap / Nix | ✅ |
 
-### Then v0.4 (intelligence — the moat)
-- `--dedupe`, spike detection, timeline chart
-- Interactive TUI (`textual`)
-- `.mzgb.toml` config file
+---
+
+## 🎯 Next: v0.4 — Intelligence (the moat)
+
+| Task | Effort |
+|---|---|
+| `--dedupe` — exact + template deduplication | medium |
+| Spike detector — 1-min buckets, mean+2σ warning | medium |
+| `--timeline` — ASCII bar chart (▁▂▃▄▅▆▇█) | small |
+| `.mzgb.toml` config loader | medium |
+| `--interactive` TUI mode using `textual` | large |
 
 ---
 
@@ -68,13 +71,15 @@ _Updated: 2026-05-06 11:00 UTC_
 
 | Agent | Role | Status |
 |---|---|---|
-| Biruk | Backend — parser, filters, streaming | IDLE — awaiting v0.2 kickoff |
-| Liya | CLI — Click wiring, renderer | IDLE — awaiting v0.2 kickoff |
+| Biruk | Backend — parser, filters, streaming | IDLE |
+| Liya | CLI — Click wiring, renderer | IDLE |
 | Tigist | Features — buffer, follow, summary | IDLE |
 | Natnael | Infra — scaffold, tests, README | IDLE |
 | Selam | Reviewer — code review gate | IDLE |
 | Endalk | Release — merge sequencer | IDLE |
-| Dawit | Senior reviewer — pre-commit gate | ACTIVE (pre-commit hook) |
+| Dawit | Senior reviewer — pre-commit gate | ACTIVE |
+
+---
 
 ## Rooms
 - #mzgb-general — announcements
@@ -84,7 +89,7 @@ _Updated: 2026-05-06 11:00 UTC_
 ---
 
 ## Key Links
-- PyPI: https://pypi.org/project/mzgb/0.1.1/
+- PyPI: https://pypi.org/project/mzgb/0.3.0/
 - GitHub (public): https://github.com/mukesudo/mzgb
 - GitHub (dev): https://github.com/mukesudo/mzgb-dev
 - Homebrew tap: https://github.com/mukesudo/homebrew-mzgb
