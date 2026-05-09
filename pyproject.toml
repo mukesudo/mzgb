@@ -7,7 +7,7 @@ include = ["mzgb*"]
 
 [project]
 name = "mzgb"
-version = "0.2.0"
+version = "0.3.0"
 description = "Fast CLI for filtering very large log files by level, pattern, and time range"
 readme = "README.md"
 license = { file = "LICENSE" }

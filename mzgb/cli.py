@@ -142,7 +142,7 @@ def _parse_time_range(
 
 def _build_pipeline(
     level: tuple,
-    pattern: Optional[str],
+    pattern: tuple,
     from_dt_parsed: Optional[datetime],
     to_dt_parsed: Optional[datetime],
     bench: bool = False,
@@ -152,7 +152,7 @@ def _build_pipeline(
     if level:
         filters.append(LevelFilter(list(level)))
     if pattern:
-        pf = PatternFilter(pattern)
+        pf = PatternFilter(list(pattern))
         if bench:
             _console.print(f"[dim]bench  matcher engine : {pf._matcher.engine}[/dim]", markup=True)
         filters.append(pf)
@@ -285,7 +285,7 @@ def _run_context(
 @click.option("--version", "-V", is_flag=True, is_eager=True, expose_value=False,
               callback=_version_callback, help="Show the version and exit.")
 @click.option("--level", "-l", multiple=True, help="Filter by log level (e.g. ERROR, WARN). Repeatable.")
-@click.option("--pattern", "-p", default=None, help="Filter by keyword or regex pattern.")
+@click.option("--pattern", "-p", multiple=True, help="Filter by keyword or regex pattern. Repeatable.")
 @click.option("--from", "from_dt", default=None, help="Start of time range (e.g. '2024-01-15 14:00:00').")
 @click.option("--to", "to_dt", default=None, help="End of time range.")
 @click.option("--context", "-C", default=0, type=int, help="Show N lines before and after each match.")
@@ -302,7 +302,7 @@ def main(  # noqa: PLR0913
     ctx: click.Context,
     files: tuple,
     level: tuple,
-    pattern: Optional[str],
+    pattern: tuple,
     from_dt: Optional[str],
     to_dt: Optional[str],
     context: int,

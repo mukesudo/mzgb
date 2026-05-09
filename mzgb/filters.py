@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from mzgb.matchers import build_matcher
 from mzgb.parser import LogLine
@@ -19,13 +19,16 @@ class LevelFilter:
 
 
 class PatternFilter:
-    """Match a LogLine using the fastest available engine for the pattern."""
+    """Match a LogLine using the fastest available engine for the pattern(s)."""
 
-    def __init__(self, pattern: str, regex_mode: bool = False):
+    def __init__(self, patterns: Union[str, List[str]], regex_mode: bool = False):
         try:
-            self._matcher = build_matcher([pattern], regex_mode=regex_mode)
+            # Handle single string for backward compatibility
+            if isinstance(patterns, str):
+                patterns = [patterns]
+            self._matcher = build_matcher(list(patterns), regex_mode=regex_mode)
         except (re.error, ValueError) as e:
-            raise ValueError(f"Invalid pattern {pattern!r}: {e}") from e
+            raise ValueError(f"Invalid patterns {patterns!r}: {e}") from e
 
     def match(self, line: LogLine) -> bool:
         return self._matcher.match(line.raw)

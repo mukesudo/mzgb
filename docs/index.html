@@ -223,9 +223,9 @@
 
   <section class="hero">
     <div class="badges">
-      <span class="badge badge-tests">&#10003; 118 tests</span>
-      <span class="badge badge-cov">91% coverage</span>
-      <span class="badge badge-ver">v0.2.0</span>
+      <span class="badge badge-tests">&#10003; 156 tests</span>
+      <span class="badge badge-cov">89% coverage</span>
+      <span class="badge badge-ver">v0.3.0</span>
       <span class="badge badge-mit">MIT</span>
     </div>
     <h1>mzgb</h1>
@@ -293,6 +293,17 @@
       </div>
 
       <div class="block">
+        <div class="block-title">Multi-pattern search (OR)</div>
+        <div class="block-body">
+<span class="dim">$</span> mzgb <span class="flag">-p</span> <span class="arg">timeout</span> <span class="flag">-p</span> <span class="arg">refused</span> <span class="flag">-p</span> <span class="arg">error</span> app.log
+
+<span class="err">[ERROR] 14:00:04  Connection timeout</span>
+<span class="err">[ERROR] 14:00:06  Connection refused</span>
+<span class="err">[ERROR] 14:00:09  Disk full error</span>
+        </div>
+      </div>
+
+      <div class="block">
         <div class="block-title">JSON output — pipe into jq</div>
         <div class="block-body">
 <span class="dim">$</span> mzgb <span class="flag">--output</span> <span class="arg">json</span> <span class="flag">--level</span> <span class="arg">ERROR</span> app.log | jq <span class="arg">'.msg'</span>
@@ -326,14 +337,14 @@
       <h3>Options</h3>
       <table>
         <tr><td><code>--level</code></td><td>Filter by log level (ERROR, WARN, INFO). Repeatable.</td></tr>
-        <tr><td><code>--pattern</code></td><td>Filter by keyword or regex.</td></tr>
+        <tr><td><code>--pattern</code></td><td>Filter by keyword or regex. <strong>Repeatable</strong> (OR logic).</td></tr>
         <tr><td><code>--from / --to</code></td><td>Time range filter.</td></tr>
         <tr><td><code>-C / --context</code></td><td>Show N lines before and after each match.</td></tr>
         <tr><td><code>--invert / -v</code></td><td>Print lines that do <strong>not</strong> match.</td></tr>
         <tr><td><code>--line-numbers / -n</code></td><td>Prefix output with source line number.</td></tr>
         <tr><td><code>--no-color</code></td><td>Disable ANSI color output.</td></tr>
         <tr><td><code>--output / -o</code></td><td>Output format: <code>text</code> (default), <code>json</code>, <code>csv</code>.</td></tr>
-        <tr><td><code>--summary</code></td><td>Print a summary table instead of raw lines.</td></tr>
+        <tr><td><code>--summary</code></td><td>Print a summary table with Drain3 template clustering.</td></tr>
         <tr><td><code>--follow</code></td><td>Follow file for new lines (like tail -f).</td></tr>
       </table>
     </div>
@@ -359,9 +370,11 @@
     </div>
 
     <div class="block" style="margin-top:1rem">
-      <div class="block-title">pip</div>
+      <div class="block-title">pip — optional extras</div>
       <div class="block-body">
 <span class="dim">$</span> pip install mzgb
+<span class="dim">$</span> pip install "mzgb[fast]"   <span class="dim"># Aho-Corasick + Bloom</span>
+<span class="dim">$</span> pip install "mzgb[drain]"  <span class="dim"># Drain3 clustering</span>
       </div>
     </div>
 
@@ -406,7 +419,7 @@
     <a href="https://github.com/mukesudo/homebrew-mzgb" target="_blank">Homebrew</a> &middot;
     <a href="https://github.com/mukesudo/scoop-mzgb" target="_blank">Scoop</a>
   </p>
-  <p class="dim" style="margin-top:0.5rem">v0.2.0 &middot; MIT License &middot; by Mukhtar Saeed</p>
+  <p class="dim" style="margin-top:0.5rem">v0.3.0 &middot; MIT License &middot; by Mukhtar Saeed</p>
 </footer>
 
 <script>
@@ -417,6 +430,7 @@
     'mzgb -n --pattern "timeout" -C 2 app.log',
     'cat server.log | mzgb --summary',
     'mzgb --level ERROR /var/log/*.log',
+    'mzgb -p timeout -p refused -p error app.log',
   ];
   let ci = 0, ci2 = 0;
   const el = document.getElementById('typed');

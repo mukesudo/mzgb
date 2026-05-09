@@ -139,6 +139,9 @@ def parse_plaintext_line(line: str) -> LogLine:
     return LogLine(raw=line, level=level, timestamp=ts, message=message)
 
 
+_LOGFMT_RE = re.compile(r'(?:^|\s)\w+=(?:"[^"]*"|\S+)')
+
+
 def detect_format(lines: List[str]) -> str:
     """Sample up to 20 lines and return 'json', 'logfmt', or 'plaintext'."""
     sample = [l.strip() for l in lines[:20] if l.strip()]
@@ -156,7 +159,8 @@ def detect_format(lines: List[str]) -> str:
                 continue
             except (json.JSONDecodeError, ValueError):
                 pass
-        if "=" in line and not line.startswith("{"):
+        matches = _LOGFMT_RE.findall(line)
+        if len(matches) >= 2:
             logfmt_hits += 1
 
     total = len(sample)
