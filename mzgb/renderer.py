@@ -31,7 +31,7 @@ class Renderer:
 
     def __init__(
         self,
-        pattern: Optional[str] = None,
+        pattern: tuple = (),
         no_color: bool = False,
         show_filename: bool = False,
         show_lineno: bool = False,
@@ -43,7 +43,8 @@ class Renderer:
         self._csv_writer = None
         if pattern:
             try:
-                self._pattern = re.compile(pattern, re.IGNORECASE)
+                combined = "|".join(f"(?:{p})" for p in pattern)
+                self._pattern = re.compile(combined, re.IGNORECASE)
             except re.error:
                 pass
 

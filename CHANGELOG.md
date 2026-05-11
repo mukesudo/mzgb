@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.3.0 (2026-05-08)
+
+### Features
+- **Multi-pattern matching** — `--pattern` is now repeatable: `mzgb -p timeout -p refused` matches any line containing either keyword
+- `mzgb/matchers.py` — factory `build_matcher(patterns, regex_mode)` auto-selects fastest engine:
+  - Single literal → **Boyer-Moore** (`str.find`, no regex overhead)
+  - Multiple literals → **Aho-Corasick** automaton O(n) scan (`mzgb[fast]`)
+  - Single regex → **Bloom + regex** trigram pre-screen (`mzgb[fast]`)
+  - Multiple regexes → **Multi-regex** single compiled alternation
+  - No patterns → **Always** no-op matcher
+- Hidden `--bench` flag — emits per-stage timing stats and engine name to stderr
+- **Drain3 template clustering** — `--summary` groups by log template when `mzgb[drain]` installed; shows top-N patterns deduplicated across similar messages
+- `cluster_id` and `template` fields added to `LogLine` dataclass
+- Optional dependency groups: `pip install "mzgb[fast]"`, `mzgb[drain]`, `mzgb[all]`
+
+### Bug Fixes
+- Fixed silent fallback (`or ""`) in `parse_json_line` and `parse_logfmt_line` — now uses explicit `None` checks per Dawit review
+
+### Tests
+- 156 passing (was 118 in v0.2.0)
+- New: `tests/unit/test_matchers.py` (28 tests), `tests/unit/test_drain.py` (10 tests)
+- Coverage: 89%
+
+### Benchmarks
+- `benchmarks/gen_logs.py` + `benchmarks/run.sh` — hyperfine suite vs grep/ripgrep on 4M-line log
+- `BENCHMARKS.md` with real results table (Apple M-series, 302MB file)
+
+---
+
 ## 0.2.0 (2026-05-06)
 
 ### Features

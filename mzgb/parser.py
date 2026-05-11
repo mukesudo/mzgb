@@ -13,6 +13,8 @@ class LogLine:
     timestamp: Optional[datetime] = None
     message: Optional[str] = None
     extras: Dict[str, Any] = field(default_factory=dict)
+    cluster_id: int = -1
+    template: Optional[str] = None
 
 
 _TS_FORMATS = [
@@ -64,7 +66,8 @@ def parse_json_line(line: str) -> LogLine:
     )
     ts = normalize_timestamp(str(raw_ts)) if raw_ts else None
 
-    msg = obj.get("msg") or obj.get("message") or obj.get("MESSAGE") or ""
+    msg_raw = obj.get("msg") or obj.get("message") or obj.get("MESSAGE")
+    msg = str(msg_raw) if msg_raw is not None else ""
 
     skip = {"level", "severity", "lvl", "LEVEL",
             "time", "timestamp", "ts", "@timestamp",
@@ -110,7 +113,8 @@ def parse_logfmt_line(line: str) -> LogLine:
         level = level.upper()
     raw_ts = pairs.get("time") or pairs.get("ts") or pairs.get("timestamp")
     ts = normalize_timestamp(raw_ts) if raw_ts else None
-    msg = pairs.get("msg") or pairs.get("message") or ""
+    msg_raw = pairs.get("msg") or pairs.get("message")
+    msg = msg_raw if msg_raw is not None else ""
     skip = {"level", "lvl", "severity", "time", "ts", "timestamp", "msg", "message"}
     extras = {k: v for k, v in pairs.items() if k not in skip}
     return LogLine(raw=line, level=level, timestamp=ts, message=msg, extras=extras)
@@ -135,6 +139,9 @@ def parse_plaintext_line(line: str) -> LogLine:
     return LogLine(raw=line, level=level, timestamp=ts, message=message)
 
 
+_LOGFMT_RE = re.compile(r'(?:^|\s)\w+=(?:"[^"]*"|\S+)')
+
+
 def detect_format(lines: List[str]) -> str:
     """Sample up to 20 lines and return 'json', 'logfmt', or 'plaintext'."""
     sample = [l.strip() for l in lines[:20] if l.strip()]
@@ -152,7 +159,8 @@ def detect_format(lines: List[str]) -> str:
                 continue
             except (json.JSONDecodeError, ValueError):
                 pass
-        if "=" in line and not line.startswith("{"):
+        matches = _LOGFMT_RE.findall(line)
+        if len(matches) >= 2:
             logfmt_hits += 1
 
     total = len(sample)
@@ -170,3 +178,15 @@ def parse_line(line: str, fmt: str) -> LogLine:
     if fmt == "logfmt":
         return parse_logfmt_line(line)
     return parse_plaintext_line(line)
+
+
+def cluster_line(log: LogLine) -> LogLine:
+    """Enrich a LogLine with drain3 cluster_id and template (in-place mutation).
+
+    Uses the message field if available, otherwise falls back to raw.
+    No-op when drain3 is not installed (cluster_id stays -1).
+    """
+    from mzgb.drain import cluster
+    text = log.message if log.message else log.raw
+    log.cluster_id, log.template = cluster(text)
+    return log

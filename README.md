@@ -1,8 +1,8 @@
 # mzgb
 
-[![Tests](https://img.shields.io/badge/tests-118%20passing-39d353?style=flat-square)](https://github.com/mukesudo/mzgb)
-[![Coverage](https://img.shields.io/badge/coverage-91%25-39d353?style=flat-square)](https://github.com/mukesudo/mzgb)
-[![PyPI](https://img.shields.io/badge/pypi-v0.2.0-4af0d0?style=flat-square)](https://pypi.org/project/mzgb)
+[![Tests](https://img.shields.io/badge/tests-156%20passing-39d353?style=flat-square)](https://github.com/mukesudo/mzgb)
+[![Coverage](https://img.shields.io/badge/coverage-89%25-39d353?style=flat-square)](https://github.com/mukesudo/mzgb)
+[![PyPI](https://img.shields.io/badge/pypi-v0.3.0-4af0d0?style=flat-square)](https://pypi.org/project/mzgb)
 [![Python](https://img.shields.io/badge/python-3.9+-4af0d0?style=flat-square)](https://pypi.org/project/mzgb)
 [![License](https://img.shields.io/badge/license-MIT-white?style=flat-square)](LICENSE)
 
@@ -13,8 +13,17 @@ Filter by log level, regex pattern, or time range. Invert matches, pipe structur
 ## Install
 
 ```bash
-# pip
+# pip (base)
 pip install mzgb
+
+# With fast engines (Aho-Corasick + Bloom filter)
+pip install "mzgb[fast]"
+
+# With Drain3 template clustering
+pip install "mzgb[drain]"
+
+# Everything
+pip install "mzgb[all]"
 
 # pipx (isolated, recommended)
 pipx install mzgb
@@ -50,6 +59,9 @@ mzgb --level ERROR app.log
 # Pattern search with context lines
 mzgb --pattern "timeout" -C 2 app.log
 
+# Multi-pattern search (OR logic) — matches any keyword
+mzgb --pattern timeout --pattern refused --pattern error app.log
+
 # Filter by time range
 mzgb --from "2024-01-15 14:00" --to "2024-01-15 15:00" app.log
 
@@ -84,14 +96,14 @@ mzgb --follow --level ERROR app.log
 | Flag | Short | Description |
 |------|-------|-------------|
 | `--level` | `-l` | Filter by log level (ERROR, WARN, INFO). Repeatable. |
-| `--pattern` | `-p` | Filter by keyword or regex. |
+| `--pattern` | `-p` | Filter by keyword or regex. **Repeatable** (OR logic). |
 | `--from / --to` | | Time range filter. |
 | `--context` | `-C` | Show N lines before and after each match. |
 | `--invert` | `-v` | Print lines that do **not** match. |
 | `--line-numbers` | `-n` | Prefix output with source line number. |
 | `--no-color` | | Disable ANSI color output. |
 | `--output` | `-o` | Output format: `text` (default), `json`, `csv`. |
-| `--summary` | `-s` | Print a summary table instead of raw lines. |
+| `--summary` | `-s` | Print a summary table with Drain3 template clustering. |
 | `--follow` | `-f` | Follow file for new lines (like tail -f). |
 
 ## Development

@@ -7,7 +7,7 @@ include = ["mzgb*"]
 
 [project]
 name = "mzgb"
-version = "0.2.0"
+version = "0.3.0"
 description = "Fast CLI for filtering very large log files by level, pattern, and time range"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -41,6 +41,18 @@ mzgb = "mzgb.cli:main"
 dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
+]
+fast = [
+    "pyahocorasick>=2.0.0",
+    "pybloom-live>=4.0.0",
+]
+drain = [
+    "drain3>=0.9.11",
+]
+all = [
+    "pyahocorasick>=2.0.0",
+    "pybloom-live>=4.0.0",
+    "drain3>=0.9.11",
 ]
 
 [project.urls]

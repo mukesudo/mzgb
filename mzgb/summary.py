@@ -10,7 +10,8 @@ from rich.live import Live
 from rich.table import Table
 from rich.text import Text
 
-from mzgb.parser import LogLine
+from mzgb.drain import is_available as drain_available
+from mzgb.parser import LogLine, cluster_line
 
 # Update the live display at most this often to avoid overhead on huge files.
 _LIVE_REFRESH_INTERVAL_SECONDS = 0.1
@@ -20,17 +21,21 @@ def summarize(lines: Iterable[LogLine]) -> dict:
     """Collect stats over a stream of LogLine objects.
 
     Returns a dict with:
-        total       — total lines processed
-        by_level    — Counter of level -> count
-        first_ts    — earliest timestamp seen (or None)
-        last_ts     — latest timestamp seen (or None)
-        unparsed    — lines with no level detected
+        total          — total lines processed
+        by_level       — Counter of level -> count
+        first_ts       — earliest timestamp seen (or None)
+        last_ts        — latest timestamp seen (or None)
+        unparsed       — lines with no level detected
+        by_template    — Counter of drain template -> count (empty if drain3 unavailable)
+        drain_enabled  — bool, whether drain3 was used
     """
     total = 0
     by_level: Counter = Counter()
+    by_template: Counter = Counter()
     first_ts = None
     last_ts = None
     unparsed = 0
+    use_drain = drain_available()
 
     for line in lines:
         total += 1
@@ -43,6 +48,10 @@ def summarize(lines: Iterable[LogLine]) -> dict:
                 first_ts = line.timestamp
             if last_ts is None or line.timestamp > last_ts:
                 last_ts = line.timestamp
+        if use_drain:
+            cluster_line(line)
+            tmpl = line.template or line.raw
+            by_template[tmpl] += 1
 
     return {
         "total": total,
@@ -50,6 +59,8 @@ def summarize(lines: Iterable[LogLine]) -> dict:
         "first_ts": first_ts,
         "last_ts": last_ts,
         "unparsed": unparsed,
+        "by_template": by_template,
+        "drain_enabled": use_drain,
     }
 
 
@@ -79,6 +90,17 @@ def print_summary(stats: dict) -> None:
     if stats["last_ts"]:
         print(f"  {'To':<20} {stats['last_ts'].strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'─' * 36}")
+
+    by_template = stats.get("by_template", {})
+    if by_template and stats.get("drain_enabled"):
+        print()
+        print(f"  Top log templates (Drain3)")
+        print(f"{'─' * 36}")
+        top_n = 10
+        for tmpl, cnt in sorted(by_template.items(), key=lambda x: -x[1])[:top_n]:
+            short = tmpl[:52] + "…" if len(tmpl) > 53 else tmpl
+            print(f"  {cnt:>6,}  {short}")
+        print(f"{'─' * 36}")
 
 
 _SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
@@ -111,9 +133,11 @@ def summarize_with_progress(lines: Iterable[LogLine]) -> dict:
 
     total = 0
     by_level: Counter = Counter()
+    by_template: Counter = Counter()
     first_ts = None
     last_ts = None
     unparsed = 0
+    use_drain = drain_available()
 
     console = Console(stderr=True, highlight=False)
     started = time.monotonic()
@@ -142,6 +166,10 @@ def summarize_with_progress(lines: Iterable[LogLine]) -> dict:
             else:
                 unparsed += 1
             first_ts, last_ts = _track_ts(line.timestamp, first_ts, last_ts)
+            if use_drain:
+                cluster_line(line)
+                tmpl = line.template or line.raw
+                by_template[tmpl] += 1
 
             now = time.monotonic()
             if now - last_update >= _LIVE_REFRESH_INTERVAL_SECONDS:
@@ -165,4 +193,6 @@ def summarize_with_progress(lines: Iterable[LogLine]) -> dict:
         "first_ts": first_ts,
         "last_ts": last_ts,
         "unparsed": unparsed,
+        "by_template": by_template,
+        "drain_enabled": use_drain,
     }
