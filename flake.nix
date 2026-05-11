@@ -14,7 +14,7 @@
         in {
           default = pkgs.python3Packages.buildPythonApplication {
             pname = "mzgb";
-            version = "0.1.1";
+            version = "0.3.0";
             src = self;
             format = "pyproject";
             nativeBuildInputs = [ pkgs.python3Packages.setuptools ];

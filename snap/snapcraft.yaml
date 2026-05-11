@@ -1,6 +1,6 @@
 name: mzgb
 base: core22
-version: '0.2.0'
+version: '0.3.0'
 summary: Fast CLI for filtering very large log files
 description: |
   mzgb (mezgeb — "record" in Amharic) is a fast CLI tool for filtering
